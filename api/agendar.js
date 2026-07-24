@@ -26,11 +26,9 @@ module.exports = async function handler(req, res) {
     });
 
     const calendar = google.calendar({ version: 'v3', auth });
-    
-    // Usaremos 'primary' para salvar na própria agenda nativa do robô (onde ele tem 100% de acesso)
     const calendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
 
-    // --- ROTA GET: Ler horários ocupados ---
+    // --- ROTA GET: Consulta horários ocupados ---
     if (req.method === 'GET') {
       const { data } = req.query;
       if (!data) return res.status(400).json({ error: 'Data não informada.' });
@@ -81,10 +79,6 @@ module.exports = async function handler(req, res) {
           dateTime: endDate.toISOString(),
           timeZone: 'America/Sao_Paulo',
         },
-        // Adicionamos você como participante para o evento aparecer direto no seu calendário pessoal
-        attendees: [
-          { email: 'tokto@cupomclic.com' } 
-        ],
         conferenceData: {
           createRequest: {
             requestId: `meet-${Date.now()}`,
@@ -97,7 +91,6 @@ module.exports = async function handler(req, res) {
         calendarId,
         requestBody: event,
         conferenceDataVersion: 1,
-        sendUpdates: 'none', // Não envia e-mails chatos do Google, apenas adiciona o evento
       });
 
       const meetLink = response.data.hangoutLink || response.data.htmlLink;
