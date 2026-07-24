@@ -42,13 +42,12 @@ export default async function handler(req, res) {
 
     const calendar = google.calendar({ version: 'v3', auth });
 
-    // ID DA SUA AGENDA OFICIAL "REUNIÕES CUPOMCLIC"
+    // ID DA SUA AGENDA REUNIÕES CUPOMCLIC
     const calendarId = '9e28766c113e96cc3f0134d01530e91a8ef4b62cce48da09b950b94306c5007a@group.calendar.google.com';
-
     const BASE_URL_SALA = 'https://agendamento-cupomclic.vercel.app/sala.html';
 
     // ----------------------------------------------------
-    // METODO GET: Consulta os agendamentos (Formulário + Admin)
+    // METODO GET: Consulta os agendamentos
     // ----------------------------------------------------
     if (req.method === 'GET') {
       const { data } = req.query;
@@ -110,17 +109,46 @@ export default async function handler(req, res) {
     }
 
     // ----------------------------------------------------
-    // METODO POST: Criação do Agendamento pelo Formulário
+    // METODO POST: Criação com Trava Anti-Spam / Duplicidade
     // ----------------------------------------------------
     if (req.method === 'POST') {
       const { data, hora, nome, email, funcao, loja, whatsapp } = req.body;
 
-      if (!data || !hora || !nome || !loja || !whatsapp) {
+      if (!data || !hora || !nome || !loja || !whatsapp || !email) {
         return res.status(400).json({ error: 'Campos obrigatórios ausentes.' });
       }
 
-      const startIso = `${data}T${hora}:00-03:00`;
+      // Normaliza dados para comparação limpa
+      const emailLimpo = email.trim().toLowerCase();
+      const whatsLimpo = whatsapp.replace(/\D/g, ''); // Mantém só números
 
+      // 🛑 TRAVA DE SEGURANÇA: Busca reuniões a partir de AGORA para evitar agendamentos duplos
+      const agoraIso = new Date().toISOString();
+      const futurasResponse = await calendar.events.list({
+        calendarId: calendarId,
+        timeMin: agoraIso,
+        singleEvents: true,
+        timeZone: 'America/Sao_Paulo'
+      });
+
+      const eventosFuturos = futurasResponse.data.items || [];
+
+      for (const ev of eventosFuturos) {
+        const desc = ev.description ? ev.description.toLowerCase() : '';
+        const descWhatsLimpo = desc.replace(/\D/g, '');
+
+        const emailEncontrado = desc.includes(emailLimpo);
+        const whatsEncontrado = whatsLimpo.length >= 8 && descWhatsLimpo.includes(whatsLimpo);
+
+        if (emailEncontrado || whatsEncontrado) {
+          return res.status(400).json({
+            error: 'Você já possui uma Reunião VIP agendada! Caso precise alterar o horário, fale com o suporte.'
+          });
+        }
+      }
+
+      // Se passou da trava, calcula o horário de término (30 min)
+      const startIso = `${data}T${hora}:00-03:00`;
       const [h, m] = hora.split(':').map(Number);
       let endH = h;
       let endM = m + 30;
@@ -137,7 +165,7 @@ export default async function handler(req, res) {
 
       const event = {
         summary: `Reunião VIP CupomClic - ${loja} (${nome})`,
-        description: `Agendamento via Site CupomClic\n\nHorário: ${hora}\nNome: ${nome}\nE-mail: ${email}\nFunção: ${funcao}\nLoja: ${loja}\nWhatsApp: ${whatsapp}\n\nLink da Sala: ${meetLinkCustom}`,
+        description: `Agendamento via Site CupomClic\n\nHorário: ${hora}\nNome: ${nome}\nE-mail: ${emailLimpo}\nFunção: ${funcao}\nLoja: ${loja}\nWhatsApp: ${whatsLimpo}\n\nLink da Sala: ${meetLinkCustom}`,
         start: {
           dateTime: startIso,
           timeZone: 'America/Sao_Paulo',
@@ -145,12 +173,16 @@ export default async function handler(req, res) {
         end: {
           dateTime: endIso,
           timeZone: 'America/Sao_Paulo',
-        }
+        },
+        attendees: [
+          { email: emailLimpo, displayName: nome }
+        ]
       };
 
       const createdEvent = await calendar.events.insert({
         calendarId: calendarId,
-        resource: event
+        resource: event,
+        sendUpdates: 'all'
       });
 
       return res.status(200).json({
