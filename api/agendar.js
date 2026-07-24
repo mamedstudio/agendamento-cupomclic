@@ -1,6 +1,7 @@
 const { google } = require('googleapis');
 
 module.exports = async function handler(req, res) {
+  // Liberar requisições (CORS)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -27,7 +28,7 @@ module.exports = async function handler(req, res) {
 
     const calendar = google.calendar({ version: 'v3', auth });
 
-    // --- ROTA DE SETUP (Caso precise no futuro) ---
+    // --- ROTA DE SETUP (Instalação e criação de agenda) ---
     if (req.method === 'GET' && req.query.setup === 'true') {
       const newCalendar = await calendar.calendars.insert({
         requestBody: { summary: 'Reuniões CupomClic (Robô)' },
@@ -83,11 +84,11 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ ocupados });
     }
 
-    // --- ROTA POST: Criar a reunião no Google Meet ---
+    // --- ROTA POST: Criar a reunião no Google Meet + Enviar Convite por E-mail ---
     if (req.method === 'POST') {
-      const { data, hora, nome, funcao, loja, whatsapp } = req.body;
+      const { data, hora, nome, email, funcao, loja, whatsapp } = req.body;
 
-      if (!data || !hora || !nome || !loja) {
+      if (!data || !hora || !nome || !email || !loja) {
         return res.status(400).json({ error: 'Dados incompletos.' });
       }
 
@@ -97,7 +98,7 @@ module.exports = async function handler(req, res) {
 
       const event = {
         summary: `Reunião VIP CupomClic - ${loja}`,
-        description: `📌 Detalhes do Agendamento VIP\n• Loja: ${loja}\n• Responsável: ${nome} (${funcao})\n• WhatsApp: ${whatsapp}`,
+        description: `📌 Detalhes do Agendamento VIP\n• Loja: ${loja}\n• Responsável: ${nome} (${funcao})\n• E-mail: ${email}\n• WhatsApp: ${whatsapp}`,
         start: {
           dateTime: startDate.toISOString(),
           timeZone: 'America/Sao_Paulo',
@@ -106,10 +107,15 @@ module.exports = async function handler(req, res) {
           dateTime: endDate.toISOString(),
           timeZone: 'America/Sao_Paulo',
         },
+        // Adiciona o lojista e você como convidados para o Google enviar os lembretes por e-mail
+        attendees: [
+          { email: email, displayName: nome },
+          { email: 'tokto@cupomclic.com', displayName: 'CupomClic' }
+        ],
         conferenceData: {
           createRequest: {
             requestId: `meet-${Date.now()}`,
-            conferenceSolutionKey: { type: 'addOn' }, // Atualizado para o tipo aceito
+            conferenceSolutionKey: { type: 'addOn' },
           },
         },
       };
@@ -118,6 +124,7 @@ module.exports = async function handler(req, res) {
         calendarId,
         requestBody: event,
         conferenceDataVersion: 1,
+        sendUpdates: 'all', // Faz o Google disparar os e-mails de convite/lembrete automaticamente
       });
 
       const meetLink = response.data.hangoutLink || response.data.htmlLink;
