@@ -44,7 +44,7 @@ export default async function handler(req, res) {
     const calendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
 
     // ----------------------------------------------------
-    // METODO GET: Consulta os agendamentos do dia
+    // METODO GET: Consulta os agendamentos do dia (Formulário + Admin)
     // ----------------------------------------------------
     if (req.method === 'GET') {
       const { data } = req.query;
@@ -66,6 +66,7 @@ export default async function handler(req, res) {
 
       const events = response.data.items || [];
 
+      // Array para o formulário (bloquear botões)
       const ocupados = events.map(event => {
         if (event.start && event.start.dateTime) {
           const date = new Date(event.start.dateTime);
@@ -76,7 +77,26 @@ export default async function handler(req, res) {
         return null;
       }).filter(Boolean);
 
-      return res.status(200).json({ ocupados });
+      // Array para o Painel Admin (renderizar a tabela)
+      const detalhes = events.map(event => {
+        let horaStr = '';
+        if (event.start && event.start.dateTime) {
+          const date = new Date(event.start.dateTime);
+          const horas = String(date.getHours()).padStart(2, '0');
+          const minutos = String(date.getMinutes()).padStart(2, '0');
+          horaStr = `${horas}:${minutos}`;
+        }
+
+        return {
+          id: event.id,
+          horario: horaStr,
+          titulo: event.summary || 'Sem título',
+          descricao: event.description || '',
+          meetLink: event.hangoutLink || event.htmlLink || '#'
+        };
+      });
+
+      return res.status(200).json({ ocupados, detalhes });
     }
 
     // ----------------------------------------------------
@@ -112,16 +132,25 @@ export default async function handler(req, res) {
         end: {
           dateTime: endDateTime,
           timeZone: 'America/Sao_Paulo',
+        },
+        conferenceData: {
+          createRequest: {
+            requestId: `cupomclic-${Date.now()}`,
+            conferenceSolutionKey: { type: 'addOn' }
+          }
         }
       };
 
       const createdEvent = await calendar.events.insert({
         calendarId: calendarId,
-        resource: event
+        resource: event,
+        conferenceDataVersion: 1
       });
 
-      // Se houver hangoutLink usa ele; caso contrário, usa o link direto do evento no Calendar
-      const meetLink = createdEvent.data.hangoutLink || createdEvent.data.htmlLink || 'https://calendar.google.com';
+      // Pega prioritariamente o link do Meet gerado
+      const meetLink = createdEvent.data.hangoutLink || 
+                       (createdEvent.data.conferenceData?.entryPoints?.find(e => e.entryPointType === 'video')?.uri) || 
+                       createdEvent.data.htmlLink;
 
       return res.status(200).json({
         success: true,
