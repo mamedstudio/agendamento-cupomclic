@@ -1,6 +1,7 @@
 import { google } from 'googleapis';
 
 export default async function handler(req, res) {
+  // Configuração de CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -40,7 +41,10 @@ export default async function handler(req, res) {
     );
 
     const calendar = google.calendar({ version: 'v3', auth });
-    const calendarId = 'primary';
+
+    // ID DA SUA AGENDA OFICIAL "REUNIÕES CUPOMCLIC"
+    const calendarId = '9e28766c113e96cc3f0134d01530e91a8ef4b62cce48da09b950b94306c5007a@group.calendar.google.com';
+
     const BASE_URL_SALA = 'https://agendamento-cupomclic.vercel.app/sala.html';
 
     // ----------------------------------------------------
@@ -53,9 +57,8 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Data não informada.' });
       }
 
-      // Consulta abrangendo o dia todo
-      const timeMin = `${data}T00:00:00Z`;
-      const timeMax = `${data}T23:59:59Z`;
+      const timeMin = `${data}T00:00:00-03:00`;
+      const timeMax = `${data}T23:59:59-03:00`;
 
       const response = await calendar.events.list({
         calendarId: calendarId,
@@ -63,6 +66,7 @@ export default async function handler(req, res) {
         timeMax: timeMax,
         singleEvents: true,
         orderBy: 'startTime',
+        timeZone: 'America/Sao_Paulo'
       });
 
       const events = response.data.items || [];
@@ -72,15 +76,11 @@ export default async function handler(req, res) {
       for (const event of events) {
         let horaStr = '';
 
-        // Tenta capturar a hora do dateTime ou da descrição
         if (event.start && event.start.dateTime) {
-          const dateObj = new Date(event.start.dateTime);
-          // Extrai hora em fuso America/Sao_Paulo
-          horaStr = dateObj.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });
-        } else if (event.summary) {
-          // Fallback por texto do resumo (ex: "15:00")
-          const matchSum = event.summary.match(/(\d{2}:\d{2})/);
-          if (matchSum) horaStr = matchSum[1];
+          const match = event.start.dateTime.match(/T(\d{2}:\d{2})/);
+          if (match) {
+            horaStr = match[1];
+          }
         }
 
         if (horaStr) {
@@ -119,7 +119,6 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Campos obrigatórios ausentes.' });
       }
 
-      // Converte data + hora em ISO 8601 exato com offset de Brasília (-03:00)
       const startIso = `${data}T${hora}:00-03:00`;
 
       const [h, m] = hora.split(':').map(Number);
@@ -137,7 +136,7 @@ export default async function handler(req, res) {
       const meetLinkCustom = `${BASE_URL_SALA}?id=cupom-${data.replace(/-/g, '')}-${hashAleatorio}`;
 
       const event = {
-        summary: `Reunião VIP CupomClic - ${loja} (${nome}) [${hora}]`,
+        summary: `Reunião VIP CupomClic - ${loja} (${nome})`,
         description: `Agendamento via Site CupomClic\n\nHorário: ${hora}\nNome: ${nome}\nE-mail: ${email}\nFunção: ${funcao}\nLoja: ${loja}\nWhatsApp: ${whatsapp}\n\nLink da Sala: ${meetLinkCustom}`,
         start: {
           dateTime: startIso,
