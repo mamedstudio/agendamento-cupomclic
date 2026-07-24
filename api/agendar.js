@@ -43,8 +43,8 @@ export default async function handler(req, res) {
     const calendar = google.calendar({ version: 'v3', auth });
     const calendarId = 'primary';
 
-    // LINK OFICIAL DO GOOGLE MEET PARA ABRIR A SALA IMEDIATAMENTE
-    const LINK_MEET_PADRAO = 'https://meet.google.com/new';
+    // LINK OFICIAL DA SUA SALA NO GOOGLE MEET
+    const LINK_MEET_OFICIAL = 'https://meet.google.com/nco-fgqq-ucz';
 
     // ----------------------------------------------------
     // METODO GET: Consulta os agendamentos (Formulário + Admin)
@@ -69,7 +69,7 @@ export default async function handler(req, res) {
 
       const events = response.data.items || [];
 
-      // Horários bloqueados para o formulário público
+      // Lista de horários ocupados para desabilitar os botões no formulário público
       const ocupados = events.map(event => {
         if (event.start && event.start.dateTime) {
           const date = new Date(event.start.dateTime);
@@ -80,7 +80,7 @@ export default async function handler(req, res) {
         return null;
       }).filter(Boolean);
 
-      // Detalhes completos para renderizar a tabela no Painel Admin
+      // Detalhes completos para renderizar a tabela no Painel Admin (/admin.html)
       const detalhes = events.map(event => {
         let horaStr = '';
         if (event.start && event.start.dateTime) {
@@ -90,14 +90,12 @@ export default async function handler(req, res) {
           horaStr = `${horas}:${minutos}`;
         }
 
-        const urlMeet = event.hangoutLink || LINK_MEET_PADRAO;
-
         return {
           id: event.id,
           horario: horaStr,
           titulo: event.summary || 'Sem título',
           descricao: event.description || '',
-          meetLink: urlMeet
+          meetLink: LINK_MEET_OFICIAL
         };
       });
 
@@ -129,7 +127,7 @@ export default async function handler(req, res) {
 
       const event = {
         summary: `Reunião VIP CupomClic - ${loja} (${nome})`,
-        description: `Agendamento via Site CupomClic\n\nNome: ${nome}\nE-mail: ${email}\nFunção: ${funcao}\nLoja: ${loja}\nWhatsApp: ${whatsapp}`,
+        description: `Agendamento via Site CupomClic\n\nNome: ${nome}\nE-mail: ${email}\nFunção: ${funcao}\nLoja: ${loja}\nWhatsApp: ${whatsapp}\n\nLink do Meet: ${LINK_MEET_OFICIAL}`,
         start: {
           dateTime: startDateTime,
           timeZone: 'America/Sao_Paulo',
@@ -145,12 +143,10 @@ export default async function handler(req, res) {
         resource: event
       });
 
-      const meetLink = createdEvent.data.hangoutLink || LINK_MEET_PADRAO;
-
       return res.status(200).json({
         success: true,
         eventId: createdEvent.data.id,
-        meetLink: meetLink,
+        meetLink: LINK_MEET_OFICIAL,
       });
     }
 
