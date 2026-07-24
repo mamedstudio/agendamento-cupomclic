@@ -247,7 +247,6 @@
     const confirmationWrapper = document.getElementById('confirmation-wrapper');
     const btnSalvarWhatsapp = document.getElementById('btn-salvar-whatsapp');
 
-    // Define data mínima como hoje
     const hoje = new Date().toISOString().split('T')[0];
     inputData.min = hoje;
 
@@ -312,7 +311,7 @@
       try {
         const response = await fetch('/api/agendar', {
           method: 'POST',
-          headers: { 'Content-Type': 'json' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             data,
             hora: horarioSelecionado,
@@ -330,11 +329,9 @@
           formWrapper.classList.add('hidden');
           confirmationWrapper.classList.remove('hidden');
 
-          // Formata a data para exibir bonito (DD/MM/AAAA)
           const partesData = data.split('-');
           const dataFormatada = `${partesData[2]}/${partesData[1]}/${partesData[0]}`;
 
-          // IMPORTANTE: Usa o meetLink direto (meet.google.com/xyz-abc-def)
           const linkMeet = result.meetLink;
           const numWhats = whatsapp.replace(/\D/g, '');
 
