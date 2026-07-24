@@ -6,218 +6,254 @@
   <title>Painel Admin - Agendamentos CupomClic</title>
   <style>
     :root {
-      --bg: #0f172a;
+      --bg-color: #0f172a;
       --card-bg: #1e293b;
-      --border: #334155;
+      --accent: #22c55e;
       --text: #f8fafc;
       --text-muted: #94a3b8;
-      --accent: #38bdf8;
-      --success: #16a34a;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, sans-serif;
+      --border: #334155;
     }
 
     body {
-      background-color: var(--bg);
+      background-color: var(--bg-color);
       color: var(--text);
-      padding: 30px 20px;
-      display: flex;
-      justify-content: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
     }
 
     .container {
-      width: 100%;
-      max-width: 900px;
+      max-width: 1000px;
+      margin: 0 auto;
     }
 
-    .header {
+    header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 16px;
     }
 
     h1 {
-      font-size: 1.5rem;
-      color: var(--accent);
+      margin: 0;
+      font-size: 24px;
+      color: var(--text);
     }
 
-    .filter-box {
+    .date-picker-group {
       display: flex;
       align-items: center;
-      gap: 12px;
-      background-color: var(--card-bg);
-      padding: 16px;
+      gap: 10px;
+      background: var(--card-bg);
+      padding: 10px 15px;
       border-radius: 8px;
       border: 1px solid var(--border);
-      margin-bottom: 24px;
     }
 
-    .filter-box label {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-    }
-
-    .filter-box input[type="date"] {
-      padding: 8px 12px;
-      background-color: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
+    input[type="date"] {
+      background: transparent;
+      border: none;
       color: var(--text);
-      font-size: 0.95rem;
+      font-size: 16px;
       outline: none;
+      cursor: pointer;
     }
 
-    .table-responsive {
-      width: 100%;
-      overflow-x: auto;
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      background-color: var(--card-bg);
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid var(--border);
+      text-align: left;
     }
 
     th, td {
-      padding: 14px 16px;
-      text-align: left;
-      font-size: 0.9rem;
+      padding: 16px;
       border-bottom: 1px solid var(--border);
-      vertical-align: top;
     }
 
     th {
-      background-color: rgba(15, 23, 42, 0.8);
-      color: var(--accent);
-      text-transform: uppercase;
-      font-size: 0.75rem;
-      letter-spacing: 0.5px;
-    }
-
-    .evento-titulo {
-      font-weight: bold;
-      color: #f8fafc;
-      margin-bottom: 4px;
-    }
-
-    .evento-desc {
-      font-size: 0.825rem;
+      background-color: rgba(255,255,255,0.03);
       color: var(--text-muted);
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .horario-badge {
+      background: #3b82f6;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 14px;
+      display: inline-block;
+    }
+
+    .detalhes-titulo {
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 6px;
+      color: #38bdf8;
+    }
+
+    .detalhes-texto {
       white-space: pre-line;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.5;
     }
 
     .btn-meet {
-      display: inline-block;
-      padding: 6px 12px;
-      background-color: #2563eb;
-      color: white;
+      background-color: var(--accent);
+      color: #000;
       text-decoration: none;
-      border-radius: 4px;
-      font-size: 0.8rem;
+      padding: 10px 16px;
+      border-radius: 8px;
       font-weight: bold;
-      margin-top: 6px;
+      font-size: 14px;
+      display: inline-block;
+      transition: opacity 0.2s;
+    }
+
+    .btn-meet:hover {
+      opacity: 0.9;
     }
 
     .empty-state {
-      text-align: center;
       padding: 40px;
+      text-align: center;
       color: var(--text-muted);
-      font-size: 0.95rem;
+      font-size: 16px;
+    }
+
+    .loading {
+      padding: 40px;
+      text-align: center;
+      color: #38bdf8;
+      font-size: 16px;
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <div class="header">
-      <h1>📊 Painel Admin - CupomClic</h1>
-    </div>
+    <header>
+      <h1>🚀 Admin - Reuniões VIP CupomClic</h1>
+      <div class="date-picker-group">
+        <label for="dataSelect">Data:</label>
+        <input type="date" id="dataSelect">
+      </div>
+    </header>
 
-    <div class="filter-box">
-      <label for="admin-data">Selecionar Data para Consulta:</label>
-      <input type="date" id="admin-data">
-    </div>
-
-    <div class="table-responsive">
-      <table>
+    <div class="card">
+      <div id="loading" class="loading">Carregando agendamentos...</div>
+      <table id="tabelaAgendamentos" style="display: none;">
         <thead>
           <tr>
-            <th style="width: 15%;">Horário</th>
-            <th style="width: 60%;">Detalhes do Agendamento</th>
-            <th style="width: 25%;">Link do Meet</th>
+            <th style="width: 120px;">Horário</th>
+            <th>Detalhes do Agendamento</th>
+            <th style="width: 180px; text-align: center;">Ação</th>
           </tr>
         </thead>
-        <tbody id="admin-tbody">
-          <tr>
-            <td colspan="3" class="empty-state">Selecione uma data acima para carregar as reuniões...</td>
-          </tr>
-        </tbody>
+        <tbody id="listaCorpo"></tbody>
       </table>
+      <div id="emptyState" class="empty-state" style="display: none;">
+        Nenhum agendamento encontrado para esta data.
+      </div>
     </div>
   </div>
 
   <script>
-    const adminData = document.getElementById('admin-data');
-    const adminTbody = document.getElementById('admin-tbody');
+    const dataInput = document.getElementById('dataSelect');
+    const loadingDiv = document.getElementById('loading');
+    const tabela = document.getElementById('tabelaAgendamentos');
+    const listaCorpo = document.getElementById('listaCorpo');
+    const emptyState = document.getElementById('emptyState');
 
-    // Define data de hoje por padrão
+    // Define a data inicial como hoje
     const hoje = new Date().toISOString().split('T')[0];
-    adminData.value = hoje;
+    dataInput.value = hoje;
 
-    carregarAgendamentosAdmin();
-
-    adminData.addEventListener('change', carregarAgendamentosAdmin);
-
-    async function carregarAgendamentosAdmin() {
-      const data = adminData.value;
-      if (!data) return;
-
-      adminTbody.innerHTML = '<tr><td colspan="3" class="empty-state">Carregando agendamentos...</td></tr>';
+    async function carregarAgendamentos(dataStr) {
+      loadingDiv.style.display = 'block';
+      tabela.style.display = 'none';
+      emptyState.style.display = 'none';
+      listaCorpo.innerHTML = '';
 
       try {
-        const response = await fetch(`/api/agendar?data=${data}`);
-        const result = await response.json();
-        const detalhes = result.detalhes || [];
+        const res = await fetch(`/api/agendar?data=${dataStr}`);
+        const result = await res.json();
 
-        if (detalhes.length === 0) {
-          adminTbody.innerHTML = '<tr><td colspan="3" class="empty-state">Nenhum agendamento encontrado para esta data.</td></tr>';
+        loadingDiv.style.display = 'none';
+
+        if (!result.detalhes || result.detalhes.length === 0) {
+          emptyState.style.display = 'block';
           return;
         }
 
-        adminTbody.innerHTML = '';
+        // Remove duplicidades por ID ou por Horário idêntico
+        const unicosMap = new Map();
+        result.detalhes.forEach(item => {
+          const chave = item.id || item.horario;
+          if (!unicosMap.has(chave)) {
+            unicosMap.set(chave, item);
+          }
+        });
 
-        detalhes.forEach(item => {
+        const agendamentosLimpos = Array.from(unicosMap.values());
+
+        // Ordena por horário crescente
+        agendamentosLimpos.sort((a, b) => (a.horario > b.horario ? 1 : -1));
+
+        agendamentosLimpos.forEach(item => {
           const tr = document.createElement('tr');
-          
+
           tr.innerHTML = `
-            <td style="font-weight: bold; color: #38bdf8;">${item.horario || 'Dia todo'}</td>
             <td>
-              <div class="evento-titulo">${item.titulo}</div>
-              <div class="evento-desc">${item.descricao}</div>
+              <span class="horario-badge">${item.horario || '---'}</span>
             </td>
             <td>
-              ${item.meetLink !== '#' ? `<a href="${item.meetLink}" target="_blank" class="btn-meet">🎥 Entrar no Meet</a>` : '<span style="color: #94a3b8;">Sem link</span>'}
+              <div class="detalhes-titulo">${item.titulo}</div>
+              <div class="detalhes-texto">${item.descricao}</div>
+            </td>
+            <td style="text-align: center;">
+              <a class="btn-meet" href="${item.meetLink}" target="_blank">📹 Entrar na Sala</a>
             </td>
           `;
 
-          adminTbody.appendChild(tr);
+          listaCorpo.appendChild(tr);
         });
 
-      } catch (error) {
-        adminTbody.innerHTML = '<tr><td colspan="3" class="empty-state" style="color: #ef4444;">Erro ao buscar dados do servidor.</td></tr>';
+        tabela.style.display = 'table';
+
+      } catch (err) {
+        console.error('Erro ao carregar dados:', err);
+        loadingDiv.style.display = 'none';
+        emptyState.textContent = 'Erro ao carregar agendamentos. Tente novamente.';
+        emptyState.style.display = 'block';
       }
     }
+
+    dataInput.addEventListener('change', (e) => {
+      carregarAgendamentos(e.target.value);
+    });
+
+    // Carrega os agendamentos do dia ao abrir
+    carregarAgendamentos(hoje);
   </script>
+
 </body>
 </html>
