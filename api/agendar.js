@@ -1,7 +1,6 @@
 import { google } from 'googleapis';
 
 export default async function handler(req, res) {
-  // Configuração de CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -42,7 +41,6 @@ export default async function handler(req, res) {
 
     const calendar = google.calendar({ version: 'v3', auth });
     const calendarId = 'primary';
-
     const BASE_URL_SALA = 'https://agendamento-cupomclic.vercel.app/sala.html';
 
     // ----------------------------------------------------
@@ -55,9 +53,9 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Data não informada.' });
       }
 
-      // Intervalo exato do dia no fuso de São Paulo
-      const timeMin = `${data}T00:00:00-03:00`;
-      const timeMax = `${data}T23:59:59-03:00`;
+      // Consulta abrangendo o dia todo
+      const timeMin = `${data}T00:00:00Z`;
+      const timeMax = `${data}T23:59:59Z`;
 
       const response = await calendar.events.list({
         calendarId: calendarId,
@@ -68,25 +66,26 @@ export default async function handler(req, res) {
       });
 
       const events = response.data.items || [];
-
-      // Mapeia os horários para anular os botões no formulário
       const ocupados = [];
       const detalhes = [];
 
       for (const event of events) {
         let horaStr = '';
 
-        // Extrai a hora exata enviada (formato HH:MM)
+        // Tenta capturar a hora do dateTime ou da descrição
         if (event.start && event.start.dateTime) {
-          const match = event.start.dateTime.match(/T(\d{2}:\d{2})/);
-          if (match) {
-            horaStr = match[1];
-            ocupados.push(horaStr);
-          }
+          const dateObj = new Date(event.start.dateTime);
+          // Extrai hora em fuso America/Sao_Paulo
+          horaStr = dateObj.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });
+        } else if (event.summary) {
+          // Fallback por texto do resumo (ex: "15:00")
+          const matchSum = event.summary.match(/(\d{2}:\d{2})/);
+          if (matchSum) horaStr = matchSum[1];
         }
 
-        // Se for um evento válido de horário
         if (horaStr) {
+          ocupados.push(horaStr);
+
           let meetLink = '';
           if (event.description) {
             const matchLink = event.description.match(/https?:\/\/[^\s]+sala\.html[^\s]*/);
@@ -120,9 +119,9 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Campos obrigatórios ausentes.' });
       }
 
-      // Monta data/hora em ISO com fuso fixo de Brasília (-03:00)
-      const startDateTime = `${data}T${hora}:00-03:00`;
-      
+      // Converte data + hora em ISO 8601 exato com offset de Brasília (-03:00)
+      const startIso = `${data}T${hora}:00-03:00`;
+
       const [h, m] = hora.split(':').map(Number);
       let endH = h;
       let endM = m + 30;
@@ -132,21 +131,21 @@ export default async function handler(req, res) {
       }
       const endHStr = String(endH).padStart(2, '0');
       const endMStr = String(endM).padStart(2, '0');
-      const endDateTime = `${data}T${endHStr}:${endMStr}:00-03:00`;
+      const endIso = `${data}T${endHStr}:${endMStr}:00-03:00`;
 
       const hashAleatorio = Math.random().toString(36).substring(2, 8);
       const meetLinkCustom = `${BASE_URL_SALA}?id=cupom-${data.replace(/-/g, '')}-${hashAleatorio}`;
 
       const event = {
-        summary: `Reunião VIP CupomClic - ${loja} (${nome})`,
-        description: `Agendamento via Site CupomClic\n\nNome: ${nome}\nE-mail: ${email}\nFunção: ${funcao}\nLoja: ${loja}\nWhatsApp: ${whatsapp}\n\nLink da Sala: ${meetLinkCustom}`,
+        summary: `Reunião VIP CupomClic - ${loja} (${nome}) [${hora}]`,
+        description: `Agendamento via Site CupomClic\n\nHorário: ${hora}\nNome: ${nome}\nE-mail: ${email}\nFunção: ${funcao}\nLoja: ${loja}\nWhatsApp: ${whatsapp}\n\nLink da Sala: ${meetLinkCustom}`,
         start: {
-          dateTime: startDateTime,
-          timeZone: 'America/Sao_Paulo'
+          dateTime: startIso,
+          timeZone: 'America/Sao_Paulo',
         },
         end: {
-          dateTime: endDateTime,
-          timeZone: 'America/Sao_Paulo'
+          dateTime: endIso,
+          timeZone: 'America/Sao_Paulo',
         }
       };
 
