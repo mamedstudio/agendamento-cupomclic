@@ -5,16 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agendamento VIP - CupomClic</title>
   <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #f97316;
+      --primary: #2563eb;
+      --success: #16a34a;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
     }
 
     body {
-      background-color: #0d1117;
-      color: #c9d1d9;
+      background-color: var(--bg);
+      color: var(--text);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -23,325 +34,244 @@
     }
 
     .container {
-      background-color: #161b22;
-      border: 1px solid #30363d;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
       border-radius: 12px;
       width: 100%;
-      max-width: 600px;
-      padding: 30px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      max-width: 480px;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     }
 
-    .logo-container {
+    .logo {
+      display: block;
+      margin: 0 auto 16px auto;
+      max-width: 160px;
+    }
+
+    h1 {
+      font-size: 1.25rem;
       text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .logo-img {
-      max-width: 180px;
-      height: auto;
-      display: inline-block;
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 25px;
-    }
-
-    .header h1 {
-      color: #f0883e;
-      font-size: 24px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    .header p {
-      color: #8b949e;
-      font-size: 14px;
-    }
-
-    .step-card {
-      background-color: #0d1117;
-      border: 1px solid #21262d;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-    .step-card h3 {
-      font-size: 14px;
-      color: #58a6ff;
-      margin-bottom: 15px;
+      color: var(--accent);
+      margin-bottom: 6px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
-    input[type="date"],
-    input[type="text"],
-    input[type="email"],
-    input[type="tel"],
-    select {
-      width: 100%;
-      padding: 12px;
-      background-color: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 6px;
-      color: #f0f6fc;
-      font-size: 15px;
-      margin-bottom: 12px;
-      outline: none;
-      transition: border-color 0.2s;
+    p.subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 24px;
     }
 
-    /* Torna o campo de data clicável em toda a extensão e clareia o ícone nativo */
-    input[type="date"] {
-      cursor: pointer;
-      color-scheme: dark;
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: #38bdf8;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      background-color: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+      outline: none;
     }
 
     input:focus, select:focus {
-      border-color: #58a6ff;
+      border-color: #38bdf8;
     }
 
     .slots-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-      gap: 10px;
-      margin-top: 10px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
     }
 
     .slot-btn {
       padding: 10px;
-      background-color: #21262d;
-      border: 1px solid #30363d;
+      background-color: rgba(15, 23, 42, 0.4);
+      border: 1px solid var(--border);
       border-radius: 6px;
-      color: #f0f6fc;
-      font-size: 14px;
-      font-weight: 600;
+      color: var(--text);
+      font-size: 0.875rem;
       cursor: pointer;
-      text-align: center;
-      transition: all 0.2s;
+      margin-bottom: 0;
+      transition: all 0.2s ease;
     }
 
     .slot-btn:hover:not(:disabled) {
-      border-color: #58a6ff;
-      background-color: #30363d;
+      border-color: var(--accent);
+      color: var(--accent);
     }
 
     .slot-btn.selected {
-      background-color: #1f6beb;
-      border-color: #58a6ff;
-      color: #ffffff;
+      background-color: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: bold;
     }
 
     .slot-btn:disabled {
-      background-color: #161b22;
-      color: #484f58;
-      border-color: #21262d;
-      text-decoration: line-through;
+      opacity: 0.3;
       cursor: not-allowed;
+      text-decoration: line-through;
     }
 
     .btn-submit {
-      width: 100%;
-      padding: 15px;
-      background-color: #238636;
+      background-color: var(--primary);
       border: none;
-      border-radius: 6px;
-      color: #ffffff;
-      font-size: 16px;
       font-weight: bold;
+      color: white;
       cursor: pointer;
-      transition: background-color 0.2s;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
+      padding: 14px;
+      font-size: 1rem;
+      margin-top: 10px;
     }
 
-    .btn-submit:hover:not(:disabled) {
-      background-color: #2ea043;
-    }
-
-    .btn-submit:disabled {
-      background-color: #21262d;
-      color: #8b949e;
-      cursor: not-allowed;
-    }
-
-    .success-card {
-      display: none;
-      background-color: #0d1117;
-      border: 1px solid #238636;
-      border-radius: 8px;
-      padding: 25px;
-      text-align: center;
-      margin-top: 20px;
-    }
-
-    .success-card h2 {
-      color: #3fb950;
-      font-size: 20px;
-      margin-bottom: 12px;
-    }
-
-    .success-card p {
-      color: #c9d1d9;
-      font-size: 15px;
-      line-height: 1.5;
-      margin-bottom: 20px;
-    }
-
-    .action-btn {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      padding: 15px;
-      border-radius: 6px;
-      font-size: 16px;
-      font-weight: bold;
-      text-decoration: none;
-      transition: opacity 0.2s;
-    }
-
-    .action-btn:hover {
+    .btn-submit:hover {
       opacity: 0.9;
     }
 
-    .btn-whatsapp {
-      background-color: #238636;
-      color: #ffffff;
+    .confirmation-card {
+      border: 1px solid var(--success);
+      background-color: rgba(22, 163, 74, 0.1);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
     }
 
-    .loading-text {
-      text-align: center;
-      color: #8b949e;
-      font-size: 14px;
-      grid-column: 1 / -1;
-      padding: 10px 0;
+    .confirmation-card h2 {
+      color: #4ade80;
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+
+    .confirmation-card p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .btn-whatsapp {
+      display: inline-block;
+      width: 100%;
+      padding: 14px;
+      background-color: var(--success);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 0.95rem;
+      box-sizing: border-box;
+    }
+
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <!-- LOGO NO TOPO -->
-    <div class="logo-container">
-      <img src="logo.png" alt="CupomClic Logo" class="logo-img">
-    </div>
+    <img src="logo.png" alt="CupomClic" class="logo" onerror="this.style.display='none'">
+    <h1>🗓️ Agendamento de Reunião</h1>
+    <p class="subtitle">Escolha um horário para apresentarmos o ProvouComprou para sua loja</p>
 
-    <div class="header">
-      <h1>🗓️ AGENDAMENTO DE REUNIÃO</h1>
-      <p>Escolha um horário para apresentarmos o ProvouComprou para sua loja</p>
-    </div>
-
-    <form id="formAgendamento">
-      <!-- 1. ESCOLHA A DATA -->
-      <div class="step-card">
-        <h3>1. ESCOLHA A DATA DA REUNIÃO:</h3>
-        <input type="date" id="dataReuniao" required>
+    <!-- FORMULÁRIO -->
+    <div id="form-wrapper">
+      <div class="section">
+        <div class="section-title">1. Escolha a Data da Reunião:</div>
+        <input type="date" id="input-data">
       </div>
 
-      <!-- 2. ESCOLHA O HORÁRIO -->
-      <div class="step-card">
-        <h3>2. ESCOLHA UM HORÁRIO DISPONÍVEL (30 MIN):</h3>
-        <div id="slotsContainer" class="slots-grid">
-          <p class="loading-text">Selecione uma data acima para carregar os horários...</p>
+      <div class="section">
+        <div class="section-title">2. Escolha um Horário Disponível (30 min):</div>
+        <div class="slots-grid" id="slots-container">
+          <p style="grid-column: span 3; text-align: center; font-size: 0.85rem; color: var(--text-muted);">Selecione uma data acima...</p>
         </div>
       </div>
 
-      <!-- 3. DADOS DO LOJISTA -->
-      <div class="step-card">
-        <h3>3. SEUS DADOS E DA LOJA:</h3>
-        <input type="text" id="nome" placeholder="Seu nome completo" required>
-        <input type="email" id="email" placeholder="Seu e-mail de contato" required>
-
-        <select id="funcao" required>
+      <div class="section">
+        <div class="section-title">3. Seus Dados e da Loja:</div>
+        <input type="text" id="input-nome" placeholder="Seu nome completo">
+        <input type="email" id="input-email" placeholder="Seu melhor e-mail">
+        <select id="select-funcao">
           <option value="" disabled selected>Selecione sua função na loja...</option>
-          <option value="Proprietário(a)">Proprietário(a) / Sócio(a)</option>
+          <option value="Proprietário(a) / Sócio(a)">Proprietário(a) / Sócio(a)</option>
           <option value="Gerente">Gerente</option>
-          <option value="Diretor(a) / C-Level">Diretor(a) / C-Level</option>
+          <option value="Marketing">Marketing</option>
           <option value="Outro">Outro</option>
         </select>
-
-        <input type="text" id="loja" placeholder="Nome da sua loja" required>
-        <input type="tel" id="whatsapp" placeholder="WhatsApp com DDD (Ex: 14999998888)" required>
+        <input type="text" id="input-loja" placeholder="Nome da sua loja">
+        <input type="tel" id="input-whatsapp" placeholder="WhatsApp com DDD (Ex: 14999998888)">
       </div>
 
-      <button type="submit" id="btnAgendar" class="btn-submit" disabled>
-        ⚡ Confirmar Agendamento VIP
-      </button>
-    </form>
+      <button id="btn-agendar" class="btn-submit">⚡ Confirmar Agendamento VIP</button>
+    </div>
 
-    <!-- CARD DE SUCESSO -->
-    <div id="successCard" class="success-card">
-      <h2>🎉 Agendamento Reservado!</h2>
-      <p id="successMsg">
-        Será um prazer demonstrar a mais nova forma de melhorar suas vendas. Reunião agendada com sucesso!
-      </p>
-      
-      <a id="whatsappShareBtn" href="#" target="_blank" class="action-btn btn-whatsapp">
-        📲 Salvar Confirmação no meu WhatsApp
-      </a>
+    <!-- TELA DE CONFIRMAÇÃO -->
+    <div id="confirmation-wrapper" class="hidden">
+      <div class="confirmation-card">
+        <h2>🎉 Agendamento Reservado!</h2>
+        <p>Será um prazer demonstrar a mais nova forma de melhorar suas vendas. Reunião agendada com sucesso!</p>
+        <a id="btn-salvar-whatsapp" href="#" target="_blank" class="btn-whatsapp">📲 Salvar Confirmação no meu WhatsApp</a>
+      </div>
     </div>
   </div>
 
   <script>
-    const dataInput = document.getElementById('dataReuniao');
-    const slotsContainer = document.getElementById('slotsContainer');
-    const btnAgendar = document.getElementById('btnAgendar');
-    const formAgendamento = document.getElementById('formAgendamento');
-    const successCard = document.getElementById('successCard');
-    const whatsappShareBtn = document.getElementById('whatsappShareBtn');
+    const HORARIOS_PADRAO = [
+      '09:00', '10:00', '11:00', '12:00', '13:00',
+      '14:00', '15:00', '16:00', '17:00', '18:00',
+      '19:00', '20:00', '21:00'
+    ];
 
     let horarioSelecionado = null;
 
+    const inputData = document.getElementById('input-data');
+    const slotsContainer = document.getElementById('slots-container');
+    const btnAgendar = document.getElementById('btn-agendar');
+    const formWrapper = document.getElementById('form-wrapper');
+    const confirmationWrapper = document.getElementById('confirmation-wrapper');
+    const btnSalvarWhatsapp = document.getElementById('btn-salvar-whatsapp');
+
     // Define data mínima como hoje
     const hoje = new Date().toISOString().split('T')[0];
-    dataInput.min = hoje;
+    inputData.min = hoje;
 
-    // Força o calendário a abrir ao clicar em qualquer lugar do campo de data
-    dataInput.addEventListener('click', () => {
-      if ('showPicker' in HTMLInputElement.prototype) {
-        try {
-          dataInput.showPicker();
-        } catch (e) {}
-      }
-    });
+    inputData.addEventListener('change', carregarHorarios);
 
-    // Horários fixos oferecidos (09:00 às 21:00)
-    const horariaosPadrao = [
-      "09:00", "10:00", "11:00", "12:00", "13:00",
-      "14:00", "15:00", "16:00", "17:00", "18:00",
-      "19:00", "20:00", "21:00"
-    ];
-
-    // Consulta os horários ocupados ao mudar a data
-    dataInput.addEventListener('change', async () => {
-      const data = dataInput.value;
+    async function carregarHorarios() {
+      const data = inputData.value;
       if (!data) return;
 
-      slotsContainer.innerHTML = '<p class="loading-text">Buscando horários na agenda...</p>';
+      slotsContainer.innerHTML = '<p style="grid-column: span 3; text-align: center; font-size: 0.85rem; color: var(--text-muted);">Consultando agenda...</p>';
       horarioSelecionado = null;
-      btnAgendar.disabled = true;
 
       try {
         const response = await fetch(`/api/agendar?data=${data}`);
         const result = await response.json();
-
         const ocupados = result.ocupados || [];
+
         slotsContainer.innerHTML = '';
 
-        horariaosPadrao.forEach(hora => {
+        HORARIOS_PADRAO.forEach(hora => {
           const btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'slot-btn';
-          btn.innerText = hora;
+          btn.textContent = hora;
 
           if (ocupados.includes(hora)) {
             btn.disabled = true;
@@ -350,75 +280,83 @@
               document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
               btn.classList.add('selected');
               horarioSelecionado = hora;
-              btnAgendar.disabled = false;
             });
           }
 
           slotsContainer.appendChild(btn);
         });
-
-      } catch (err) {
-        slotsContainer.innerHTML = '<p class="loading-text" style="color: #f85149;">Erro ao carregar horários. Tente novamente.</p>';
+      } catch (error) {
+        slotsContainer.innerHTML = '<p style="grid-column: span 3; text-align: center; font-size: 0.85rem; color: #ef4444;">Erro ao carregar horários.</p>';
       }
-    });
+    }
 
-    // Processa o Envio do Agendamento
-    formAgendamento.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    btnAgendar.addEventListener('click', async () => {
+      const data = inputData.value;
+      const nome = document.getElementById('input-nome').value.trim();
+      const email = document.getElementById('input-email').value.trim();
+      const funcao = document.getElementById('select-funcao').value;
+      const loja = document.getElementById('input-loja').value.trim();
+      const whatsapp = document.getElementById('input-whatsapp').value.trim();
 
-      if (!horarioSelecionado) {
-        alert('Por favor, selecione um horário disponível!');
-        return;
-      }
+      if (!data) return alert('Por favor, escolha a data.');
+      if (!horarioSelecionado) return alert('Por favor, selecione um horário.');
+      if (!nome) return alert('Por favor, informe seu nome.');
+      if (!email) return alert('Por favor, informe seu e-mail.');
+      if (!funcao) return alert('Por favor, selecione sua função.');
+      if (!loja) return alert('Por favor, informe a loja.');
+      if (!whatsapp) return alert('Por favor, informe seu WhatsApp.');
 
       btnAgendar.disabled = true;
-      btnAgendar.innerText = '⌛ Criando reunião no Google Meet...';
-
-      const dataFormatada = dataInput.value.split('-').reverse().join('/');
-      const whatsappUser = document.getElementById('whatsapp').value.replace(/\D/g, '');
-
-      const payload = {
-        data: dataInput.value,
-        hora: horarioSelecionado,
-        nome: document.getElementById('nome').value,
-        email: document.getElementById('email').value,
-        funcao: document.getElementById('funcao').value,
-        loja: document.getElementById('loja').value,
-        whatsapp: whatsappUser
-      };
+      btnAgendar.textContent = '⏳ Criando reunião no Google Meet...';
 
       try {
-        const res = await fetch('/api/agendar', {
+        const response = await fetch('/api/agendar', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          headers: { 'Content-Type': 'json' },
+          body: JSON.stringify({
+            data,
+            hora: horarioSelecionado,
+            nome,
+            email,
+            funcao,
+            loja,
+            whatsapp
+          })
         });
 
-        const data = await res.json();
+        const result = await response.json();
 
-        if (res.ok && data.success) {
-          formAgendamento.style.display = 'none';
+        if (response.ok && result.success) {
+          formWrapper.classList.add('hidden');
+          confirmationWrapper.classList.remove('hidden');
 
-          // Texto formatado sem caracteres quebrados para o WhatsApp
-          const textoWa = `*Reunião Agendada - CupomClic*\n\n` +
+          // Formata a data para exibir bonito (DD/MM/AAAA)
+          const partesData = data.split('-');
+          const dataFormatada = `${partesData[2]}/${partesData[1]}/${partesData[0]}`;
+
+          // IMPORTANTE: Usa o meetLink direto (meet.google.com/xyz-abc-def)
+          const linkMeet = result.meetLink;
+          const numWhats = whatsapp.replace(/\D/g, '');
+
+          const textoWhats = encodeURIComponent(
+            `Reunião Agendada - CupomClic\n\n` +
             `Será um prazer demonstrar a mais nova forma de melhorar suas vendas!\n\n` +
-            `📅 *Data:* ${dataFormatada}\n` +
-            `⏰ *Horário:* ${horarioSelecionado}\n` +
-            `🏢 *Loja:* ${payload.loja}\n\n` +
-            `📹 *Link da Sala no Google Meet:*\n${data.meetLink}`;
-          
-          whatsappShareBtn.href = `https://api.whatsapp.com/send?phone=55${whatsappUser}&text=${encodeURIComponent(textoWa)}`;
-          
-          successCard.style.display = 'block';
+            `📅 Data: ${dataFormatada}\n` +
+            `⏰ Horário: ${horarioSelecionado}\n` +
+            `🏬 Loja: ${loja}\n\n` +
+            `🎥 Link da Sala no Google Meet:\n${linkMeet}`
+          );
+
+          btnSalvarWhatsapp.href = `https://wa.me/55${numWhats}?text=${textoWhats}`;
         } else {
-          alert('Erro ao agendar: ' + (data.error || 'Erro desconhecido.'));
+          alert('Erro ao agendar: ' + (result.details || result.error || 'Erro desconhecido.'));
           btnAgendar.disabled = false;
-          btnAgendar.innerText = '⚡ Confirmar Agendamento VIP';
+          btnAgendar.textContent = '⚡ Confirmar Agendamento VIP';
         }
-      } catch (error) {
+      } catch (err) {
         alert('Erro ao conectar com o servidor.');
         btnAgendar.disabled = false;
-        btnAgendar.innerText = '⚡ Confirmar Agendamento VIP';
+        btnAgendar.textContent = '⚡ Confirmar Agendamento VIP';
       }
     });
   </script>
