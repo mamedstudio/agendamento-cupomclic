@@ -1,7 +1,6 @@
 import { google } from 'googleapis';
 
 export default async function handler(req, res) {
-  // Configuração de CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -20,10 +19,9 @@ export default async function handler(req, res) {
     const privateKey = process.env.GOOGLE_PRIVATE_KEY
       ? process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n')
       : null;
-    const calendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
 
     if (!clientEmail || !privateKey) {
-      return res.status(500).json({ error: 'Credenciais do Google não configuradas nas variáveis de ambiente.' });
+      return res.status(500).json({ error: 'Credenciais do Google não configuradas.' });
     }
 
     const auth = new google.auth.JWT(
@@ -34,12 +32,13 @@ export default async function handler(req, res) {
     );
 
     const calendar = google.calendar({ version: 'v3', auth });
+    
+    // USA A AGENDA NATIVA DO ROBÔ (Sem trava de permissão do Workspace)
+    const calendarId = 'primary';
 
-    // ----------------------------------------------------
-    // METODO GET: Consulta os agendamentos do dia
-    // ----------------------------------------------------
+    // GET: Consulta os horários ocupados
     if (req.method === 'GET') {
-      const { data } = req.query; // Espera YYYY-MM-DD
+      const { data } = req.query;
 
       if (!data) {
         return res.status(400).json({ error: 'Data não informada.' });
@@ -58,11 +57,9 @@ export default async function handler(req, res) {
 
       const events = response.data.items || [];
 
-      // Mapeia horários ocupados para o Formulário de Agendamento
       const ocupados = events.map(event => {
         if (event.start && event.start.dateTime) {
           const date = new Date(event.start.dateTime);
-          // Extrai o horário no fuso local (HH:MM)
           const horas = String(date.getHours()).padStart(2, '0');
           const minutos = String(date.getMinutes()).padStart(2, '0');
           return `${horas}:${minutos}`;
@@ -70,31 +67,10 @@ export default async function handler(req, res) {
         return null;
       }).filter(Boolean);
 
-      // Mapeia detalhes completos para o Painel Admin
-      const detalhes = events.map(event => {
-        let horaStr = '';
-        if (event.start && event.start.dateTime) {
-          const date = new Date(event.start.dateTime);
-          const horas = String(date.getHours()).padStart(2, '0');
-          const minutos = String(date.getMinutes()).padStart(2, '0');
-          horaStr = `${horas}:${minutos}`;
-        }
-
-        return {
-          id: event.id,
-          horario: horaStr,
-          titulo: event.summary || 'Sem título',
-          descricao: event.description || '',
-          meetLink: event.hangoutLink || event.htmlLink || '#'
-        };
-      });
-
-      return res.status(200).json({ ocupados, detalhes });
+      return res.status(200).json({ ocupados });
     }
 
-    // ----------------------------------------------------
-    // METODO POST: Cria o agendamento no Google Calendar
-    // ----------------------------------------------------
+    // POST: Cria o agendamento no Google Calendar
     if (req.method === 'POST') {
       const { data, hora, nome, email, funcao, loja, whatsapp } = req.body;
 
@@ -104,7 +80,6 @@ export default async function handler(req, res) {
 
       const startDateTime = `${data}T${hora}:00-03:00`;
       
-      // Calcula fim da reunião (+30 min)
       const [h, m] = hora.split(':').map(Number);
       let endH = h;
       let endM = m + 30;
