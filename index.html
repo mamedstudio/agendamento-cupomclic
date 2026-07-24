@@ -3,89 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agendamento VIP - CupomClic</title>
+  <title>Agendamento Reunião VIP - CupomClic</title>
   <style>
     :root {
-      --bg: #0f172a;
+      --bg-color: #0f172a;
       --card-bg: #1e293b;
-      --border: #334155;
-      --text: #f8fafc;
+      --accent: #22c55e;
+      --accent-hover: #16a34a;
+      --text: #ffffff;
       --text-muted: #94a3b8;
-      --accent: #f97316;
-      --primary: #2563eb;
-      --success: #16a34a;
+      --border: #334155;
     }
 
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, sans-serif;
     }
 
     body {
-      background-color: var(--bg);
+      background-color: var(--bg-color);
       color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      padding: 20px;
     }
 
     .container {
       background-color: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      width: 100%;
+      border-radius: 20px;
+      padding: 30px 24px;
       max-width: 480px;
-      padding: 24px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    }
-
-    .logo {
-      display: block;
-      margin: 0 auto 16px auto;
-      max-width: 160px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
     }
 
     h1 {
-      font-size: 1.25rem;
+      font-size: 26px;
       text-align: center;
-      color: var(--accent);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      margin-top: 0;
+      margin-bottom: 8px;
     }
 
-    p.subtitle {
+    p.subtitulo {
       text-align: center;
       color: var(--text-muted);
-      font-size: 0.875rem;
-      margin-bottom: 24px;
+      font-size: 15px;
+      margin-bottom: 25px;
     }
 
-    .section {
+    /* ETAPA 1: SELEÇÃO DE DATA E HORÁRIOS */
+    .form-group {
       margin-bottom: 20px;
     }
 
-    .section-title {
-      font-size: 0.875rem;
-      font-weight: 700;
-      color: #38bdf8;
-      margin-bottom: 10px;
-      text-transform: uppercase;
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
     }
 
-    input, select, button {
+    input[type="date"],
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    select {
       width: 100%;
-      padding: 12px;
-      background-color: rgba(15, 23, 42, 0.6);
+      padding: 14px;
+      background-color: #0f172a;
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 10px;
       color: var(--text);
-      font-size: 0.95rem;
-      margin-bottom: 12px;
+      font-size: 16px;
       outline: none;
     }
 
@@ -93,282 +87,355 @@
       border-color: #38bdf8;
     }
 
-    .slots-grid {
+    .grid-horarios {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
+      gap: 10px;
+      margin-top: 10px;
     }
 
-    .slot-btn {
-      padding: 10px;
-      background-color: rgba(15, 23, 42, 0.4);
+    .btn-horario {
+      padding: 14px 8px;
+      background-color: #0f172a;
       border: 1px solid var(--border);
-      border-radius: 6px;
       color: var(--text);
-      font-size: 0.875rem;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 15px;
       cursor: pointer;
-      margin-bottom: 0;
-      transition: all 0.2s ease;
+      transition: all 0.2s;
     }
 
-    .slot-btn:hover:not(:disabled) {
+    .btn-horario:hover:not(:disabled) {
       border-color: var(--accent);
       color: var(--accent);
     }
 
-    .slot-btn.selected {
-      background-color: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-      font-weight: bold;
+    .btn-horario.ocupado {
+      background-color: #1e293b;
+      color: #475569;
+      text-decoration: line-through;
+      border-color: #1e293b;
+      cursor: not-allowed;
+      opacity: 0.6;
     }
 
-    .slot-btn:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-      text-decoration: line-through;
+    /* CARD DE CONFIRMAÇÃO DE SELEÇÃO */
+    .card-selecionado {
+      background-color: #0f172a;
+      border: 1px solid var(--accent);
+      border-radius: 14px;
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .card-selecionado .info-data {
+      font-size: 15px;
+      color: var(--text-muted);
+    }
+
+    .card-selecionado .info-destaque {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--accent);
+      margin-top: 4px;
+    }
+
+    .btn-alterar {
+      background: #334155;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-alterar:hover {
+      background: #475569;
+    }
+
+    /* ETAPA 2 & 3: FORMULÁRIO E ACEITE LGPD */
+    #secaoFormulario {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .box-lgpd {
+      margin-top: 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      text-align: left;
+    }
+
+    .box-lgpd input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      margin-top: 2px;
+    }
+
+    .box-lgpd label {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-bottom: 0;
+      cursor: pointer;
+    }
+
+    .box-lgpd a {
+      color: #38bdf8;
+      text-decoration: underline;
     }
 
     .btn-submit {
-      background-color: var(--primary);
+      width: 100%;
+      padding: 18px;
+      background-color: var(--accent);
+      color: #ffffff;
       border: none;
+      border-radius: 12px;
+      font-size: 18px;
       font-weight: bold;
-      color: white;
       cursor: pointer;
-      padding: 14px;
-      font-size: 1rem;
-      margin-top: 10px;
+      box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4);
+      transition: background-color 0.2s, transform 0.1s;
     }
 
     .btn-submit:hover {
-      opacity: 0.9;
+      background-color: var(--accent-hover);
     }
 
-    .confirmation-card {
-      border: 1px solid var(--success);
-      background-color: rgba(22, 163, 74, 0.1);
-      border-radius: 8px;
-      padding: 20px;
-      text-align: center;
-    }
-
-    .confirmation-card h2 {
-      color: #4ade80;
-      font-size: 1.1rem;
-      margin-bottom: 8px;
-    }
-
-    .confirmation-card p {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-    }
-
-    .btn-whatsapp {
-      display: inline-block;
-      width: 100%;
-      padding: 14px;
-      background-color: var(--success);
-      color: white;
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 0.95rem;
-      box-sizing: border-box;
-    }
-
-    .footer-version {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 0.75rem;
+    .btn-submit:disabled {
+      background-color: #334155;
       color: #64748b;
-      letter-spacing: 0.5px;
+      cursor: not-allowed;
+      box-shadow: none;
     }
 
-    .hidden {
-      display: none;
+    .status-msg {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <img src="logo.png" alt="CupomClic" class="logo" onerror="this.style.display='none'">
-    <h1>🗓️ Agendamento de Reunião</h1>
-    <p class="subtitle">Escolha um horário para apresentarmos o ProvouComprou para sua loja</p>
+    <h1>🚀 Reunião VIP CupomClic</h1>
+    <p class="subtitulo">Escolha o melhor dia e horário para o nosso encontro</p>
 
-    <!-- FORMULÁRIO -->
-    <div id="form-wrapper">
-      <div class="section">
-        <div class="section-title">1. Escolha a Data da Reunião:</div>
-        <input type="date" id="input-data">
+    <!-- ETAPA 1: SELEÇÃO DE DATA E HORÁRIO -->
+    <div id="secaoSelecao">
+      <div class="form-group">
+        <label for="dataInput">Selecione a Data:</label>
+        <input type="date" id="dataInput">
       </div>
 
-      <div class="section">
-        <div class="section-title">2. Escolha um Horário Disponível (30 min):</div>
-        <div class="slots-grid" id="slots-container">
-          <p style="grid-column: span 3; text-align: center; font-size: 0.85rem; color: var(--text-muted);">Selecione uma data acima...</p>
+      <div class="form-group">
+        <label>Horários Disponíveis:</label>
+        <div id="gridHorarios" class="grid-horarios">
+          <!-- Botões de horário inseridos dinamicamente -->
         </div>
       </div>
+    </div>
 
-      <div class="section">
-        <div class="section-title">3. Seus Dados e da Loja:</div>
-        <input type="text" id="input-nome" placeholder="Seu nome completo">
-        <input type="email" id="input-email" placeholder="Seu melhor e-mail">
-        <select id="select-funcao">
-          <option value="" disabled selected>Selecione sua função na loja...</option>
-          <option value="Proprietário(a) / Sócio(a)">Proprietário(a) / Sócio(a)</option>
-          <option value="Gerente">Gerente</option>
-          <option value="Marketing">Marketing</option>
-          <option value="Outro">Outro</option>
-        </select>
-        <input type="text" id="input-loja" placeholder="Nome da sua loja">
-        <input type="tel" id="input-whatsapp" placeholder="WhatsApp com DDD (Ex: 14999998888)">
+    <!-- ETAPA 2: CONFIRMAÇÃO DO HORÁRIO E DADOS DO LOJISTA -->
+    <div id="secaoFormulario">
+      <!-- Card da escolha do Lojista -->
+      <div class="card-selecionado">
+        <div>
+          <div class="info-data">Horário Escolhido:</div>
+          <div class="info-destaque" id="txtResumoSelecao">--/-- às --:--</div>
+        </div>
+        <button class="btn-alterar" type="button" onclick="alterarHorario()">✏️ Alterar</button>
       </div>
 
-      <button id="btn-agendar" class="btn-submit">⚡ Confirmar Agendamento VIP</button>
+      <form id="formAgendamento">
+        <div class="form-group">
+          <label for="nome">Seu Nome Completo:</label>
+          <input type="text" id="nome" required placeholder="Ex: João Silva">
+        </div>
+
+        <div class="form-group">
+          <label for="loja">Nome da Sua Loja:</label>
+          <input type="text" id="loja" required placeholder="Ex: Mamed Store">
+        </div>
+
+        <div class="form-group">
+          <label for="whatsapp">WhatsApp (com DDD):</label>
+          <input type="tel" id="whatsapp" required placeholder="Ex: 14999999999">
+        </div>
+
+        <div class="form-group">
+          <label for="email">E-mail Comercial:</label>
+          <input type="email" id="email" required placeholder="seuemail@exemplo.com">
+        </div>
+
+        <div class="form-group">
+          <label for="funcao">Qual sua função na loja?</label>
+          <select id="funcao" required>
+            <option value="">Selecione...</option>
+            <option value="Proprietário(a) / Sócio(a)">Proprietário(a) / Sócio(a)</option>
+            <option value="Gerente de Marketing / Vendas">Gerente de Marketing / Vendas</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+
+        <!-- ACEITE DE DADOS / LGPD -->
+        <div class="box-lgpd">
+          <input type="checkbox" id="aceiteTermos" required>
+          <label for="aceiteTermos">
+            Concordo com o uso dos meus dados para o agendamento da reunião e contato da equipe, de acordo com os <a href="/termos.html" target="_blank">Termos de Uso e Privacidade</a>.
+          </label>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btnSubmit">
+          🚀 Confirmar Agendamento
+        </button>
+      </form>
     </div>
 
-    <!-- TELA DE CONFIRMAÇÃO -->
-    <div id="confirmation-wrapper" class="hidden">
-      <div class="confirmation-card">
-        <h2>🎉 Agendamento Reservado!</h2>
-        <p>Será um prazer demonstrar a mais nova forma de melhorar suas vendas. Reunião agendada com sucesso!</p>
-        <a id="btn-salvar-whatsapp" href="#" target="_blank" class="btn-whatsapp">📲 Salvar Confirmação no meu WhatsApp</a>
-      </div>
-    </div>
-
-    <!-- RODAPÉ DE VERSÃO -->
-    <div class="footer-version">
-      Versão: <strong>v1.0.4 - Meet Direct</strong>
-    </div>
+    <div id="statusMsg" class="status-msg"></div>
   </div>
 
   <script>
-    const HORARIOS_PADRAO = [
-      '09:00', '10:00', '11:00', '12:00', '13:00',
-      '14:00', '15:00', '16:00', '17:00', '18:00',
-      '19:00', '20:00', '21:00'
-    ];
+    const HORARIOS_PADRAO = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 
-    let horarioSelecionado = null;
+    const dataInput = document.getElementById('dataInput');
+    const gridHorarios = document.getElementById('gridHorarios');
+    const secaoSelecao = document.getElementById('secaoSelecao');
+    const secaoFormulario = document.getElementById('secaoFormulario');
+    const txtResumoSelecao = document.getElementById('txtResumoSelecao');
+    const statusMsg = document.getElementById('statusMsg');
+    const form = document.getElementById('formAgendamento');
 
-    const inputData = document.getElementById('input-data');
-    const slotsContainer = document.getElementById('slots-container');
-    const btnAgendar = document.getElementById('btn-agendar');
-    const formWrapper = document.getElementById('form-wrapper');
-    const confirmationWrapper = document.getElementById('confirmation-wrapper');
-    const btnSalvarWhatsapp = document.getElementById('btn-salvar-whatsapp');
+    let horaSelecionada = null;
 
+    // Define data mínima como hoje
     const hoje = new Date().toISOString().split('T')[0];
-    inputData.min = hoje;
+    dataInput.value = hoje;
+    dataInput.min = hoje;
 
-    inputData.addEventListener('change', carregarHorarios);
-
-    async function carregarHorarios() {
-      const data = inputData.value;
-      if (!data) return;
-
-      slotsContainer.innerHTML = '<p style="grid-column: span 3; text-align: center; font-size: 0.85rem; color: var(--text-muted);">Consultando agenda...</p>';
-      horarioSelecionado = null;
-
+    async function buscarHorariosOcupados(dataStr) {
+      gridHorarios.innerHTML = '<div style="grid-column: span 3; text-align: center; color: #94a3b8; padding: 10px;">Buscando horários...</div>';
+      
       try {
-        const response = await fetch(`/api/agendar?data=${data}`);
-        const result = await response.json();
-        const ocupados = result.ocupados || [];
+        const res = await fetch(`/api/agendar?data=${dataStr}`);
+        const data = await res.json();
+        const ocupados = data.ocupados || [];
 
-        slotsContainer.innerHTML = '';
+        gridHorarios.innerHTML = '';
 
         HORARIOS_PADRAO.forEach(hora => {
           const btn = document.createElement('button');
           btn.type = 'button';
-          btn.className = 'slot-btn';
+          btn.className = 'btn-horario';
           btn.textContent = hora;
 
           if (ocupados.includes(hora)) {
+            btn.classList.add('ocupado');
             btn.disabled = true;
           } else {
-            btn.addEventListener('click', () => {
-              document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
-              btn.classList.add('selected');
-              horarioSelecionado = hora;
-            });
+            btn.onclick = () => selecionarHorario(dataStr, hora);
           }
 
-          slotsContainer.appendChild(btn);
+          gridHorarios.appendChild(btn);
         });
-      } catch (error) {
-        slotsContainer.innerHTML = '<p style="grid-column: span 3; text-align: center; font-size: 0.85rem; color: #ef4444;">Erro ao carregar horários.</p>';
+
+      } catch (err) {
+        console.error('Erro ao buscar horários:', err);
+        gridHorarios.innerHTML = '<div style="grid-column: span 3; text-align: center; color: #ef4444;">Erro ao carregar horários.</div>';
       }
     }
 
-    btnAgendar.addEventListener('click', async () => {
-      const data = inputData.value;
-      const nome = document.getElementById('input-nome').value.trim();
-      const email = document.getElementById('input-email').value.trim();
-      const funcao = document.getElementById('select-funcao').value;
-      const loja = document.getElementById('input-loja').value.trim();
-      const whatsapp = document.getElementById('input-whatsapp').value.trim();
+    function selecionarHorario(dataStr, hora) {
+      horaSelecionada = hora;
 
-      if (!data) return alert('Por favor, escolha a data.');
-      if (!horarioSelecionado) return alert('Por favor, selecione um horário.');
-      if (!nome) return alert('Por favor, informe seu nome.');
-      if (!email) return alert('Por favor, informe seu e-mail.');
-      if (!funcao) return alert('Por favor, selecione sua função.');
-      if (!loja) return alert('Por favor, informe a loja.');
-      if (!whatsapp) return alert('Por favor, informe seu WhatsApp.');
+      // Formata a data para exibir (Ex: 24/07/2026)
+      const partes = dataStr.split('-');
+      const dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
 
-      btnAgendar.disabled = true;
-      btnAgendar.textContent = '⏳ Criando reunião no Google Meet...';
+      txtResumoSelecao.textContent = `${dataFormatada} às ${hora}h`;
+
+      // Esconde a grade de escolha e mostra o formulário limpo
+      secaoSelecao.style.display = 'none';
+      secaoFormulario.style.display = 'block';
+    }
+
+    function alterarHorario() {
+      horaSelecionada = null;
+      secaoFormulario.style.display = 'none';
+      secaoSelecao.style.display = 'block';
+    }
+
+    dataInput.addEventListener('change', (e) => {
+      buscarHorariosOcupados(e.target.value);
+    });
+
+    // Submissão do Formulário
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const btnSubmit = document.getElementById('btnSubmit');
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = 'Agendando...';
+      statusMsg.textContent = '';
+
+      const payload = {
+        data: dataInput.value,
+        hora: horaSelecionada,
+        nome: document.getElementById('nome').value,
+        loja: document.getElementById('loja').value,
+        whatsapp: document.getElementById('whatsapp').value,
+        email: document.getElementById('email').value,
+        funcao: document.getElementById('funcao').value
+      };
 
       try {
         const response = await fetch('/api/agendar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            data,
-            hora: horarioSelecionado,
-            nome,
-            email,
-            funcao,
-            loja,
-            whatsapp
-          })
+          body: JSON.stringify(payload)
         });
 
         const result = await response.json();
 
-        if (response.ok && result.success) {
-          formWrapper.classList.add('hidden');
-          confirmationWrapper.classList.remove('hidden');
-
-          const partesData = data.split('-');
-          const dataFormatada = `${partesData[2]}/${partesData[1]}/${partesData[0]}`;
-
-          const linkMeet = result.meetLink;
-          const numWhats = whatsapp.replace(/\D/g, '');
-
-          const textoWhats = encodeURIComponent(
-            `Reunião Agendada - CupomClic\n\n` +
-            `Será um prazer demonstrar a mais nova forma de melhorar suas vendas!\n\n` +
-            `📅 Data: ${dataFormatada}\n` +
-            `⏰ Horário: ${horarioSelecionado}\n` +
-            `🏬 Loja: ${loja}\n\n` +
-            `🎥 Link da Sala no Google Meet:\n${linkMeet}`
-          );
-
-          btnSalvarWhatsapp.href = `https://wa.me/55${numWhats}?text=${textoWhats}`;
+        if (result.success) {
+          // Redireciona para a sala VIP personalizada do lojista
+          window.location.href = result.meetLink;
         } else {
-          alert('Erro ao agendar: ' + (result.details || result.error || 'Erro desconhecido.'));
-          btnAgendar.disabled = false;
-          btnAgendar.textContent = '⚡ Confirmar Agendamento VIP';
+          statusMsg.style.color = '#ef4444';
+          statusMsg.textContent = result.error || 'Erro ao realizar agendamento.';
+          btnSubmit.disabled = false;
+          btnSubmit.textContent = '🚀 Confirmar Agendamento';
         }
       } catch (err) {
-        alert('Erro ao conectar com o servidor.');
-        btnAgendar.disabled = false;
-        btnAgendar.textContent = '⚡ Confirmar Agendamento VIP';
+        console.error('Erro na submissão:', err);
+        statusMsg.style.color = '#ef4444';
+        statusMsg.textContent = 'Erro de conexão com o servidor.';
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = '🚀 Confirmar Agendamento';
       }
     });
+
+    // Inicialização
+    buscarHorariosOcupados(hoje);
   </script>
+
 </body>
 </html>
