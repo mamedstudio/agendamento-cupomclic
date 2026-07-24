@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Admin - Agendamentos CupomClic</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --success: #16a34a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 30px 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      color: var(--accent);
+    }
+
+    .filter-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background-color: var(--card-bg);
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .filter-box label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .filter-box input[type="date"] {
+      padding: 8px 12px;
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background-color: rgba(15, 23, 42, 0.8);
+      color: var(--accent);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .btn-zap {
+      display: inline-block;
+      padding: 6px 12px;
+      background-color: var(--success);
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .btn-zap:hover {
+      opacity: 0.9;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>📊 Painel Admin - CupomClic</h1>
+    </div>
+
+    <div class="filter-box">
+      <label for="admin-data">Selecionar Data para Consulta:</label>
+      <input type="date" id="admin-data">
+    </div>
+
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Horário</th>
+            <th>Loja / Detalhes do Evento</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody id="admin-tbody">
+          <tr>
+            <td colspan="3" class="empty-state">Selecione uma data acima para carregar as reuniões...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const adminData = document.getElementById('admin-data');
+    const adminTbody = document.getElementById('admin-tbody');
+
+    // Define data de hoje por padrão
+    const hoje = new Date().toISOString().split('T')[0];
+    adminData.value = hoje;
+
+    // Carrega dados iniciais de hoje
+    carregarAgendamentosAdmin();
+
+    adminData.addEventListener('change', carregarAgendamentosAdmin);
+
+    async function carregarAgendamentosAdmin() {
+      const data = adminData.value;
+      if (!data) return;
+
+      adminTbody.innerHTML = '<tr><td colspan="3" class="empty-state">Carregando agendamentos...</td></tr>';
+
+      try {
+        const response = await fetch(`/api/agendar?data=${data}`);
+        const result = await response.json();
+        const ocupados = result.ocupados || [];
+
+        if (ocupados.length === 0) {
+          adminTbody.innerHTML = '<tr><td colspan="3" class="empty-state">Nenhum agendamento encontrado para esta data.</td></tr>';
+          return;
+        }
+
+        adminTbody.innerHTML = '';
+
+        ocupados.forEach(hora => {
+          const tr = document.createElement('tr');
+          
+          tr.innerHTML = `
+            <td style="font-weight: bold; color: #38bdf8;">${hora}</td>
+            <td>Reunião Agendada no Google Calendar</td>
+            <td>
+              <span style="font-size: 0.8rem; color: #94a3b8;">Cadastrado</span>
+            </td>
+          `;
+
+          adminTbody.appendChild(tr);
+        });
+
+      } catch (error) {
+        adminTbody.innerHTML = '<tr><td colspan="3" class="empty-state" style="color: #ef4444;">Erro ao buscar dados do servidor.</td></tr>';
+      }
+    }
+  </script>
+</body>
+</html>
