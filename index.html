@@ -55,7 +55,7 @@
 <body>
   <div class="container">
     <div class="logo-container">
-      <img src="logo.png" alt="CupomClic" class="logo-img">
+      <img src="logo.png" alt="CupomClic" class="logo-img" onerror="this.style.display='none'">
     </div>
 
     <h1>📅 AGENDAMENTO DE REUNIÃO</h1>
@@ -70,7 +70,7 @@
 
       <!-- 2. GRADE DE HORÁRIOS -->
       <div class="form-group" id="grupoHorarios" style="display: none;">
-        <label>2. ESCOLHA UM HORÁRIO DISPONÍVEL (30 MIN):</label>
+        <label id="labelHorarios">2. ESCOLHA UM HORÁRIO DISPONÍVEL (30 MIN):</label>
         <div id="gridHorarios" class="time-grid"></div>
       </div>
 
@@ -98,10 +98,10 @@
     <div id="resultBox" class="result-box">
       <div class="result-title">🎉 Agendamento Confirmado!</div>
       <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px;">
-        Sua reunião foi reservada com sucesso. Enviamos os detalhes e o link da reunião para o seu WhatsApp!
+        Sua reunião foi reservada com sucesso no Google Calendar!
       </p>
       
-      <div id="meetUrl" class="meet-box">https://meet.google.com/abc-defg-hij</div>
+      <div id="meetUrl" class="meet-box">https://meet.google.com/...</div>
 
       <a id="btnEntrarMeet" class="btn-meet" href="#" target="_blank">📹 Abrir Reunião no Google Meet</a>
     </div>
@@ -116,34 +116,54 @@
       document.getElementById('dataReuniao').min = hoje;
     });
 
-    // Horários das 09:00 às 22:00 (Blocos de 30 min com 30 min de intervalo)
     const horariosBase = [
       "09:00", "10:00", "11:00", "12:00", "13:00", 
       "14:00", "15:00", "16:00", "17:00", "18:00", 
       "19:00", "20:00", "21:00"
     ];
 
-    function carregarHorariosDisponiveis() {
+    async function carregarHorariosDisponiveis() {
       const data = document.getElementById('dataReuniao').value;
       const grid = document.getElementById('gridHorarios');
       const grupo = document.getElementById('grupoHorarios');
+      const label = document.getElementById('labelHorarios');
 
       if (!data) return;
 
-      grid.innerHTML = '';
+      grupo.style.display = 'block';
+      grid.innerHTML = '<p style="color: var(--accent-gold); font-size: 0.85rem;">Consultando agenda...</p>';
       horarioSelecionado = null;
       validarFormulario();
 
-      // No próximo passo, chamaremos a API do Google para saber os ocupados de verdade
-      horariosBase.forEach(hora => {
-        const div = document.createElement('div');
-        div.className = 'time-slot';
-        div.innerText = hora;
-        div.onclick = () => selecionarHorario(div, hora);
-        grid.appendChild(div);
-      });
+      try {
+        // Consulta horários ocupados direto da nossa API Serverless
+        const response = await fetch(`/api/agendar?data=${data}`);
+        const result = await response.json();
+        const ocupados = result.ocupados || [];
 
-      grupo.style.display = 'block';
+        grid.innerHTML = '';
+        label.innerText = "2. ESCOLHA UM HORÁRIO DISPONÍVEL (30 MIN):";
+
+        horariosBase.forEach(hora => {
+          const div = document.createElement('div');
+          const isOcupado = ocupados.includes(hora);
+
+          div.className = `time-slot ${isOcupado ? 'occupied' : ''}`;
+          div.innerText = hora;
+
+          if (!isOcupado) {
+            div.onclick = () => selecionarHorario(div, hora);
+          } else {
+            div.title = "Horário já reservado";
+          }
+
+          grid.appendChild(div);
+        });
+
+      } catch (err) {
+        console.error("Erro ao buscar horários:", err);
+        grid.innerHTML = '<p style="color: var(--accent-red); font-size: 0.85rem;">Erro ao carregar horários. Tente novamente.</p>';
+      }
     }
 
     function selecionarHorario(elemento, hora) {
@@ -174,13 +194,44 @@
     async function confirmarAgendamento() {
       const btn = document.getElementById('btnAgendar');
       btn.disabled = true;
-      btn.innerText = '⏳ Agendando no Google Calendar...';
+      btn.innerText = '⏳ Criando reunião no Google Meet...';
 
-      // Simulando confirmação por enquanto (No Passo 3 integraremos com o backend)
-      setTimeout(() => {
-        document.getElementById('formContainer').style.display = 'none';
-        document.getElementById('resultBox').style.display = 'block';
-      }, 1500);
+      const payload = {
+        data: document.getElementById('dataReuniao').value,
+        hora: horarioSelecionado,
+        nome: document.getElementById('nomeParticipante').value.trim(),
+        funcao: document.getElementById('funcaoParticipante').value,
+        loja: document.getElementById('nomeLoja').value.trim(),
+        whatsapp: document.getElementById('whatsLoja').value.trim()
+      };
+
+      try {
+        const response = await fetch('/api/agendar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'json' },
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const resData = await response.json();
+
+        if (response.ok && resData.meetLink) {
+          document.getElementById('formContainer').style.display = 'none';
+          document.getElementById('resultBox').style.display = 'block';
+
+          document.getElementById('meetUrl').innerText = resData.meetLink;
+          document.getElementById('btnEntrarMeet').href = resData.meetLink;
+        } else {
+          alert('Erro ao agendar: ' + (resData.error || 'Tente novamente em instantes.'));
+          btn.disabled = false;
+          btn.innerText = '⚡ Confirmar Agendamento VIP';
+        }
+      } catch (err) {
+        console.error('Erro na requisição:', err);
+        alert('Falha na comunicação com o servidor. Tente novamente.');
+        btn.disabled = false;
+        btn.innerText = '⚡ Confirmar Agendamento VIP';
+      }
     }
   </script>
 </body>
