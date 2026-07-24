@@ -5,234 +5,365 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agendamento VIP - CupomClic</title>
   <style>
-    :root {
-      --bg-color: #0d131a;
-      --card-bg: #151d27;
-      --input-bg: #0b0f14;
-      --border-color: #243242;
-      --text-main: #f0f4f8;
-      --text-muted: #94a3b8;
-      --accent-gold: #e69c5e;
-      --accent-blue: #38bdf8;
-      --accent-green: #22c55e;
-      --accent-red: #ef4444;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-    body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; padding: 20px; display: flex; justify-content: center; align-items: flex-start; }
-    .container { width: 100%; max-width: 650px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); margin-top: 10px; }
-    
-    .logo-container { text-align: center; margin-bottom: 15px; }
-    .logo-img { max-width: 200px; width: 100%; height: auto; border-radius: 8px; display: inline-block; }
+    body {
+      background-color: #0d1117;
+      color: #c9d1d9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
 
-    h1 { color: var(--accent-gold); font-size: 1.4rem; text-align: center; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
-    p.subtitle { text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 25px; }
-    
-    .form-group { margin-bottom: 18px; background: var(--input-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); }
-    label { display: block; font-size: 0.85rem; font-weight: bold; color: var(--accent-blue); text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px; }
-    
-    input[type="text"], input[type="tel"], input[type="date"], select { width: 100%; padding: 12px; background: var(--card-bg); border: 1px solid #1e3a5f; border-radius: 8px; color: var(--text-main); font-size: 0.95rem; outline: none; }
-    input:focus, select:focus { border-color: var(--accent-gold); }
+    .container {
+      background-color: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 600px;
+      padding: 30px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
 
-    /* GRADE DE HORÁRIOS */
-    .time-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; }
-    .time-slot { background: #1e293b; border: 1px solid #334155; color: var(--text-main); padding: 12px 5px; border-radius: 8px; text-align: center; font-size: 0.9rem; font-weight: bold; cursor: pointer; transition: all 0.2s; }
-    .time-slot:hover { border-color: var(--accent-gold); }
-    .time-slot.selected { background: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
-    .time-slot.occupied { background: #151921; color: #475569; border-color: #1e293b; cursor: not-allowed; text-decoration: line-through; opacity: 0.5; }
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
 
-    .btn-main { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent-gold), #c47c3e); border: none; border-radius: 8px; color: #000; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
-    .btn-main:hover:not(:disabled) { opacity: 0.95; }
-    .btn-main:disabled { opacity: 0.35; cursor: not-allowed; background: #334155; color: #94a3b8; }
+    .header h1 {
+      color: #f0883e;
+      font-size: 24px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
 
-    .result-box { margin-top: 25px; background: #0f1e2e; border: 1px dashed var(--accent-green); padding: 20px; border-radius: 12px; display: none; text-align: center; }
-    .result-title { color: var(--accent-green); font-weight: bold; font-size: 1.2rem; margin-bottom: 10px; }
-    
-    .meet-box { background: var(--input-bg); padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.9rem; color: var(--accent-blue); margin: 15px 0; border: 1px solid var(--border-color); word-break: break-all; }
-    .btn-meet { display: inline-block; width: 100%; padding: 14px; background: #00832d; color: #fff; border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 1rem; }
+    .header p {
+      color: #8b949e;
+      font-size: 14px;
+    }
+
+    .step-card {
+      background-color: #0d1117;
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .step-card h3 {
+      font-size: 14px;
+      color: #58a6ff;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="date"],
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    select {
+      width: 100%;
+      padding: 12px;
+      background-color: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      color: #f0f6fc;
+      font-size: 15px;
+      margin-bottom: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: #58a6ff;
+    }
+
+    .slots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .slot-btn {
+      padding: 10px;
+      background-color: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      color: #f0f6fc;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .slot-btn:hover:not(:disabled) {
+      border-color: #58a6ff;
+      background-color: #30363d;
+    }
+
+    .slot-btn.selected {
+      background-color: #1f6beb;
+      border-color: #58a6ff;
+      color: #ffffff;
+    }
+
+    .slot-btn:disabled {
+      background-color: #161b22;
+      color: #484f58;
+      border-color: #21262d;
+      text-decoration: line-through;
+      cursor: not-allowed;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 15px;
+      background-color: #238636;
+      border: none;
+      border-radius: 6px;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background-color: #2ea043;
+    }
+
+    .btn-submit:disabled {
+      background-color: #21262d;
+      color: #8b949e;
+      cursor: not-allowed;
+    }
+
+    .success-card {
+      display: none;
+      background-color: #0d1117;
+      border: 1px solid #238636;
+      border-radius: 8px;
+      padding: 25px;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .success-card h2 {
+      color: #3fb950;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .success-card p {
+      color: #8b949e;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .meet-btn {
+      display: inline-block;
+      width: 100%;
+      padding: 14px;
+      background-color: #1f6beb;
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 6px;
+      transition: background-color 0.2s;
+    }
+
+    .meet-btn:hover {
+      background-color: #388bfd;
+    }
+
+    .loading-text {
+      text-align: center;
+      color: #8b949e;
+      font-size: 14px;
+      grid-column: 1 / -1;
+      padding: 10px 0;
+    }
   </style>
 </head>
 <body>
+
   <div class="container">
-    <div class="logo-container">
-      <img src="logo.png" alt="CupomClic" class="logo-img" onerror="this.style.display='none'">
+    <div class="header">
+      <h1>🗓️ AGENDAMENTO DE REUNIÃO</h1>
+      <p>Escolha um horário para apresentarmos o ProvouComprou para sua loja</p>
     </div>
 
-    <h1>📅 AGENDAMENTO DE REUNIÃO</h1>
-    <p class="subtitle">Escolha um horário para apresentarmos o ProvouComprou para sua loja</p>
-
-    <div id="formContainer">
-      <!-- 1. DATA DA REUNIÃO -->
-      <div class="form-group">
-        <label>1. ESCOLHA A DATA DA REUNIÃO:</label>
-        <input type="date" id="dataReuniao" onchange="carregarHorariosDisponiveis()">
+    <form id="formAgendamento">
+      <!-- 1. ESCOLHA A DATA -->
+      <div class="step-card">
+        <h3>1. ESCOLHA A DATA DA REUNIÃO:</h3>
+        <input type="date" id="dataReuniao" required>
       </div>
 
-      <!-- 2. GRADE DE HORÁRIOS -->
-      <div class="form-group" id="grupoHorarios" style="display: none;">
-        <label id="labelHorarios">2. ESCOLHA UM HORÁRIO DISPONÍVEL (30 MIN):</label>
-        <div id="gridHorarios" class="time-grid"></div>
+      <!-- 2. ESCOLHA O HORÁRIO -->
+      <div class="step-card">
+        <h3>2. ESCOLHA UM HORÁRIO DISPONÍVEL (30 MIN):</h3>
+        <div id="slotsContainer" class="slots-grid">
+          <p class="loading-text">Selecione uma data acima para carregar os horários...</p>
+        </div>
       </div>
 
-      <!-- 3. DADOS DO PARTICIPANTE -->
-      <div class="form-group">
-        <label>3. SEUS DADOS E DA LOJA:</label>
-        <input type="text" id="nomeParticipante" placeholder="Seu nome completo" oninput="validarFormulario()" style="margin-bottom: 10px;">
+      <!-- 3. DADOS DO LOJISTA -->
+      <div class="step-card">
+        <h3>3. SEUS DADOS E DA LOJA:</h3>
+        <input type="text" id="nome" placeholder="Seu nome completo" required>
+        <input type="email" id="email" placeholder="Seu melhor e-mail (para receber o convite)" required>
         
-        <select id="funcaoParticipante" onchange="validarFormulario()" style="margin-bottom: 10px;">
+        <select id="funcao" required>
           <option value="" disabled selected>Selecione sua função na loja...</option>
-          <option value="Proprietário">Proprietário(a)</option>
+          <option value="Proprietário(a)">Proprietário(a) / Sócio(a)</option>
           <option value="Gerente">Gerente</option>
-          <option value="Atendente">Atendente / Vendedor(a)</option>
-          <option value="Marketing">Marketing / Comercial</option>
+          <option value="Diretor(a) / C-Level">Diretor(a) / C-Level</option>
+          <option value="Outro">Outro</option>
         </select>
 
-        <input type="text" id="nomeLoja" placeholder="Nome da sua loja" oninput="validarFormulario()" style="margin-bottom: 10px;">
-        <input type="tel" id="whatsLoja" placeholder="WhatsApp com DDD (Ex: 11999998888)" oninput="validarFormulario()">
+        <input type="text" id="loja" placeholder="Nome da sua loja" required>
+        <input type="tel" id="whatsapp" placeholder="WhatsApp com DDD (Ex: 14999998888)" required>
       </div>
 
-      <button id="btnAgendar" class="btn-main" onclick="confirmarAgendamento()" disabled>⚡ Confirmar Agendamento VIP</button>
-    </div>
+      <button type="submit" id="btnAgendar" class="btn-submit" disabled>
+        ⚡ Confirmar Agendamento VIP
+      </button>
+    </form>
 
-    <!-- TELA DE SUCESSO -->
-    <div id="resultBox" class="result-box">
-      <div class="result-title">🎉 Agendamento Confirmado!</div>
-      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px;">
-        Sua reunião foi reservada com sucesso no Google Calendar!
-      </p>
-      
-      <div id="meetUrl" class="meet-box">https://meet.google.com/...</div>
-
-      <a id="btnEntrarMeet" class="btn-meet" href="#" target="_blank">📹 Abrir Reunião no Google Meet</a>
+    <!-- CARD DE SUCESSO -->
+    <div id="successCard" class="success-card">
+      <h2>🎉 Agendamento Confirmado!</h2>
+      <p>O convite oficial com o link do Google Meet foi enviado para o seu e-mail e adicionado à agenda do CupomClic!</p>
+      <a id="meetLinkBtn" href="#" target="_blank" class="meet-btn">📹 Abrir Reunião no Google Meet</a>
     </div>
   </div>
 
   <script>
+    const dataInput = document.getElementById('dataReuniao');
+    const slotsContainer = document.getElementById('slotsContainer');
+    const btnAgendar = document.getElementById('btnAgendar');
+    const formAgendamento = document.getElementById('formAgendamento');
+    const successCard = document.getElementById('successCard');
+    const meetLinkBtn = document.getElementById('meetLinkBtn');
+
     let horarioSelecionado = null;
 
-    // Bloqueia datas passadas no calendário
-    window.addEventListener('DOMContentLoaded', () => {
-      const hoje = new Date().toISOString().split('T')[0];
-      document.getElementById('dataReuniao').min = hoje;
-    });
+    // Define data mínima como hoje
+    const hoje = new Date().toISOString().split('T')[0];
+    dataInput.min = hoje;
 
-    const horariosBase = [
-      "09:00", "10:00", "11:00", "12:00", "13:00", 
-      "14:00", "15:00", "16:00", "17:00", "18:00", 
+    // Horários fixos oferecidos (09:00 às 21:00)
+    const horariaosPadrao = [
+      "09:00", "10:00", "11:00", "12:00", "13:00",
+      "14:00", "15:00", "16:00", "17:00", "18:00",
       "19:00", "20:00", "21:00"
     ];
 
-    async function carregarHorariosDisponiveis() {
-      const data = document.getElementById('dataReuniao').value;
-      const grid = document.getElementById('gridHorarios');
-      const grupo = document.getElementById('grupoHorarios');
-      const label = document.getElementById('labelHorarios');
-
+    // Consulta os horários ocupados ao mudar a data
+    dataInput.addEventListener('change', async () => {
+      const data = dataInput.value;
       if (!data) return;
 
-      grupo.style.display = 'block';
-      grid.innerHTML = '<p style="color: var(--accent-gold); font-size: 0.85rem;">Consultando agenda...</p>';
+      slotsContainer.innerHTML = '<p class="loading-text">Buscando horários na agenda...</p>';
       horarioSelecionado = null;
-      validarFormulario();
+      btnAgendar.disabled = true;
 
       try {
-        // Consulta horários ocupados direto da nossa API Serverless
         const response = await fetch(`/api/agendar?data=${data}`);
         const result = await response.json();
+
         const ocupados = result.ocupados || [];
+        slotsContainer.innerHTML = '';
 
-        grid.innerHTML = '';
-        label.innerText = "2. ESCOLHA UM HORÁRIO DISPONÍVEL (30 MIN):";
+        horariaosPadrao.forEach(hora => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'slot-btn';
+          btn.innerText = hora;
 
-        horariosBase.forEach(hora => {
-          const div = document.createElement('div');
-          const isOcupado = ocupados.includes(hora);
-
-          div.className = `time-slot ${isOcupado ? 'occupied' : ''}`;
-          div.innerText = hora;
-
-          if (!isOcupado) {
-            div.onclick = () => selecionarHorario(div, hora);
+          if (ocupados.includes(hora)) {
+            btn.disabled = true;
           } else {
-            div.title = "Horário já reservado";
+            btn.addEventListener('click', () => {
+              document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+              btn.classList.add('selected');
+              horarioSelecionado = hora;
+              btnAgendar.disabled = false;
+            });
           }
 
-          grid.appendChild(div);
+          slotsContainer.appendChild(btn);
         });
 
       } catch (err) {
-        console.error("Erro ao buscar horários:", err);
-        grid.innerHTML = '<p style="color: var(--accent-red); font-size: 0.85rem;">Erro ao carregar horários. Tente novamente.</p>';
+        slotsContainer.innerHTML = '<p class="loading-text" style="color: #f85149;">Erro ao carregar horários. Tente novamente.</p>';
       }
-    }
+    });
 
-    function selecionarHorario(elemento, hora) {
-      if (elemento.classList.contains('occupied')) return;
+    // Processa o Envio do Agendamento
+    formAgendamento.addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-      document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
-      elemento.classList.add('selected');
-      horarioSelecionado = hora;
-      validarFormulario();
-    }
-
-    function validarFormulario() {
-      const data = document.getElementById('dataReuniao').value;
-      const nome = document.getElementById('nomeParticipante').value.trim();
-      const funcao = document.getElementById('funcaoParticipante').value;
-      const loja = document.getElementById('nomeLoja').value.trim();
-      const whats = document.getElementById('whatsLoja').value.trim();
-
-      const btn = document.getElementById('btnAgendar');
-
-      if (data && horarioSelecionado && nome && funcao && loja && whats.length >= 10) {
-        btn.disabled = false;
-      } else {
-        btn.disabled = true;
+      if (!horarioSelecionado) {
+        alert('Por favor, selecione um horário disponível!');
+        return;
       }
-    }
 
-    async function confirmarAgendamento() {
-      const btn = document.getElementById('btnAgendar');
-      btn.disabled = true;
-      btn.innerText = '⏳ Criando reunião no Google Meet...';
+      btnAgendar.disabled = true;
+      btnAgendar.innerText = '⌛ Criando reunião no Google Meet...';
 
       const payload = {
-        data: document.getElementById('dataReuniao').value,
+        data: dataInput.value,
         hora: horarioSelecionado,
-        nome: document.getElementById('nomeParticipante').value.trim(),
-        funcao: document.getElementById('funcaoParticipante').value,
-        loja: document.getElementById('nomeLoja').value.trim(),
-        whatsapp: document.getElementById('whatsLoja').value.trim()
+        nome: document.getElementById('nome').value,
+        email: document.getElementById('email').value,
+        funcao: document.getElementById('funcao').value,
+        loja: document.getElementById('loja').value,
+        whatsapp: document.getElementById('whatsapp').value
       };
 
       try {
-        const response = await fetch('/api/agendar', {
+        const res = await fetch('/api/agendar', {
           method: 'POST',
-          headers: { 'Content-Type': 'json' },
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
-        const resData = await response.json();
+        const data = await res.json();
 
-        if (response.ok && resData.meetLink) {
-          document.getElementById('formContainer').style.display = 'none';
-          document.getElementById('resultBox').style.display = 'block';
-
-          document.getElementById('meetUrl').innerText = resData.meetLink;
-          document.getElementById('btnEntrarMeet').href = resData.meetLink;
+        if (res.ok && data.success) {
+          formAgendamento.style.display = 'none';
+          meetLinkBtn.href = data.meetLink;
+          successCard.style.display = 'block';
         } else {
-          alert('Erro ao agendar: ' + (resData.error || 'Tente novamente em instantes.'));
-          btn.disabled = false;
-          btn.innerText = '⚡ Confirmar Agendamento VIP';
+          alert('Erro ao agendar: ' + (data.error || 'Erro desconhecido.'));
+          btnAgendar.disabled = false;
+          btnAgendar.innerText = '⚡ Confirmar Agendamento VIP';
         }
-      } catch (err) {
-        console.error('Erro na requisição:', err);
-        alert('Falha na comunicação com o servidor. Tente novamente.');
-        btn.disabled = false;
-        btn.innerText = '⚡ Confirmar Agendamento VIP';
+      } catch (error) {
+        alert('Erro ao conectar com o servidor.');
+        btnAgendar.disabled = false;
+        btnAgendar.innerText = '⚡ Confirmar Agendamento VIP';
       }
-    }
+    });
   </script>
 </body>
 </html>
