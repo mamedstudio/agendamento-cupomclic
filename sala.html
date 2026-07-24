@@ -40,40 +40,27 @@
       font-size: 15px;
       margin-bottom: 25px;
     }
-    .spinner {
-      border: 4px solid rgba(255, 255, 255, 0.1);
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      border-left-color: #22c55e;
-      animation: spin 0.9s linear infinite;
-      margin: 0 auto 20px auto;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
     .btn-entrar {
       display: block;
       width: 100%;
       background-color: #22c55e;
       color: #ffffff;
-      padding: 16px 20px;
-      border-radius: 10px;
+      padding: 18px 20px;
+      border-radius: 12px;
       text-decoration: none;
       font-weight: bold;
-      font-size: 16px;
-      margin-top: 15px;
+      font-size: 18px;
       box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4);
-      transition: background-color 0.2s;
+      transition: background-color 0.2s, transform 0.1s;
     }
     .btn-entrar:active {
       background-color: #16a34a;
+      transform: scale(0.98);
     }
     .dica-mobile {
-      font-size: 12px;
+      font-size: 13px;
       color: #64748b;
-      margin-top: 15px;
+      margin-top: 20px;
       line-height: 1.4;
     }
   </style>
@@ -82,35 +69,16 @@
 
   <div class="card">
     <div class="logo">🚀 CupomClic</div>
-    <div class="subtitulo">Conectando você à sua Reunião VIP...</div>
-    
-    <div class="spinner"></div>
+    <div class="subtitulo">Sua Reunião VIP está pronta!</div>
 
-    <a id="link-meet" class="btn-entrar" href="https://meet.google.com/nco-fgqq-ucz" target="_top">
+    <a class="btn-entrar" href="https://meet.google.com/nco-fgqq-ucz" target="_blank" rel="noopener noreferrer">
       👉 TOQUE AQUI PARA ENTRAR
     </a>
 
     <div class="dica-mobile">
-      Se a sala não abrir automaticamente em 2 segundos, toque no botão verde acima.
+      Toque no botão acima para acessar a sala de reunião no seu navegador.
     </div>
   </div>
-
-  <script>
-    // Link direto e limpo do Google Meet
-    const SALA_MEET = 'https://meet.google.com/nco-fgqq-ucz';
-
-    const btnMeet = document.getElementById('link-meet');
-    btnMeet.href = SALA_MEET;
-
-    // Tenta o redirecionamento automático
-    setTimeout(() => {
-      try {
-        window.location.replace(SALA_MEET);
-      } catch (e) {
-        console.log("Aguardando toque do usuário no celular.");
-      }
-    }, 1500);
-  </script>
 
 </body>
 </html>
