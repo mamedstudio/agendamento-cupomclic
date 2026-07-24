@@ -3,21 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agendamento Reunião VIP - CupomClic</title>
+  <title>Agendamento VIP - CupomClic</title>
   <style>
     :root {
-      --bg-color: #0f172a;
-      --card-bg: #1e293b;
-      --accent: #22c55e;
-      --accent-hover: #16a34a;
+      --bg-color: #0d131f;
+      --card-bg: #161f30;
+      --accent-blue: #2563eb;
+      --accent-blue-hover: #1d4ed8;
       --text: #ffffff;
       --text-muted: #94a3b8;
-      --border: #334155;
+      --border: #243044;
+      --green: #22c55e;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       background-color: var(--bg-color);
@@ -33,39 +32,38 @@
 
     .container {
       background-color: var(--card-bg);
-      border-radius: 20px;
+      border-radius: 16px;
       padding: 30px 24px;
-      max-width: 480px;
+      max-width: 440px;
       width: 100%;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
       border: 1px solid var(--border);
     }
 
     h1 {
-      font-size: 26px;
+      font-size: 24px;
       text-align: center;
       margin-top: 0;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     p.subtitulo {
       text-align: center;
       color: var(--text-muted);
-      font-size: 15px;
+      font-size: 14px;
       margin-bottom: 25px;
     }
 
-    /* ETAPA 1: SELEÇÃO DE DATA E HORÁRIOS */
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     label {
       display: block;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--text-muted);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     input[type="date"],
@@ -75,104 +73,92 @@
     select {
       width: 100%;
       padding: 14px;
-      background-color: #0f172a;
+      background-color: #0d131f;
       border: 1px solid var(--border);
       border-radius: 10px;
       color: var(--text);
-      font-size: 16px;
+      font-size: 15px;
       outline: none;
     }
 
     input:focus, select:focus {
-      border-color: #38bdf8;
+      border-color: var(--accent-blue);
     }
 
     .grid-horarios {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
-      margin-top: 10px;
+      margin-top: 8px;
     }
 
     .btn-horario {
-      padding: 14px 8px;
-      background-color: #0f172a;
+      padding: 12px 6px;
+      background-color: #0d131f;
       border: 1px solid var(--border);
       color: var(--text);
-      border-radius: 10px;
+      border-radius: 8px;
       font-weight: bold;
-      font-size: 15px;
+      font-size: 14px;
       cursor: pointer;
       transition: all 0.2s;
     }
 
     .btn-horario:hover:not(:disabled) {
-      border-color: var(--accent);
-      color: var(--accent);
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
     }
 
     .btn-horario.ocupado {
-      background-color: #1e293b;
+      background-color: #161f30;
       color: #475569;
       text-decoration: line-through;
-      border-color: #1e293b;
+      border-color: #161f30;
       cursor: not-allowed;
-      opacity: 0.6;
+      opacity: 0.5;
     }
 
-    /* CARD DE CONFIRMAÇÃO DE SELEÇÃO */
+    /* CARD UX DA SELEÇÃO */
     .card-selecionado {
-      background-color: #0f172a;
-      border: 1px solid var(--accent);
-      border-radius: 14px;
-      padding: 18px 20px;
+      background-color: #0d131f;
+      border: 1px solid var(--green);
+      border-radius: 12px;
+      padding: 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
     }
 
     .card-selecionado .info-data {
-      font-size: 15px;
+      font-size: 13px;
       color: var(--text-muted);
     }
 
     .card-selecionado .info-destaque {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
-      color: var(--accent);
-      margin-top: 4px;
+      color: var(--green);
+      margin-top: 2px;
     }
 
     .btn-alterar {
-      background: #334155;
+      background: #243044;
       color: #fff;
       border: none;
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 13px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.2s;
     }
 
-    .btn-alterar:hover {
-      background: #475569;
-    }
-
-    /* ETAPA 2 & 3: FORMULÁRIO E ACEITE LGPD */
     #secaoFormulario {
       display: none;
-      animation: fadeIn 0.3s ease-in-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
     }
 
     .box-lgpd {
-      margin-top: 20px;
+      margin-top: 15px;
       margin-bottom: 20px;
       display: flex;
       align-items: flex-start;
@@ -181,15 +167,15 @@
     }
 
     .box-lgpd input[type="checkbox"] {
-      width: 20px;
-      height: 20px;
-      accent-color: var(--accent);
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent-blue);
       cursor: pointer;
       margin-top: 2px;
     }
 
     .box-lgpd label {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--text-muted);
       line-height: 1.4;
       margin-bottom: 0;
@@ -203,33 +189,43 @@
 
     .btn-submit {
       width: 100%;
-      padding: 18px;
-      background-color: var(--accent);
+      padding: 16px;
+      background-color: var(--accent-blue);
       color: #ffffff;
       border: none;
-      border-radius: 12px;
-      font-size: 18px;
+      border-radius: 10px;
+      font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4);
-      transition: background-color 0.2s, transform 0.1s;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
     .btn-submit:hover {
-      background-color: var(--accent-hover);
+      background-color: var(--accent-blue-hover);
     }
 
     .btn-submit:disabled {
-      background-color: #334155;
+      background-color: #243044;
       color: #64748b;
       cursor: not-allowed;
       box-shadow: none;
     }
 
-    .status-msg {
-      margin-top: 15px;
+    .version-footer {
       text-align: center;
-      font-size: 14px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 20px;
+    }
+
+    .status-msg {
+      margin-top: 12px;
+      text-align: center;
+      font-size: 13px;
     }
   </style>
 </head>
@@ -237,7 +233,7 @@
 
   <div class="container">
     <h1>🚀 Reunião VIP CupomClic</h1>
-    <p class="subtitulo">Escolha o melhor dia e horário para o nosso encontro</p>
+    <p class="subtitulo">Agende sua sessão individual de suporte</p>
 
     <!-- ETAPA 1: SELEÇÃO DE DATA E HORÁRIO -->
     <div id="secaoSelecao">
@@ -248,18 +244,15 @@
 
       <div class="form-group">
         <label>Horários Disponíveis:</label>
-        <div id="gridHorarios" class="grid-horarios">
-          <!-- Botões de horário inseridos dinamicamente -->
-        </div>
+        <div id="gridHorarios" class="grid-horarios"></div>
       </div>
     </div>
 
-    <!-- ETAPA 2: CONFIRMAÇÃO DO HORÁRIO E DADOS DO LOJISTA -->
+    <!-- ETAPA 2: FORMULÁRIO -->
     <div id="secaoFormulario">
-      <!-- Card da escolha do Lojista -->
       <div class="card-selecionado">
         <div>
-          <div class="info-data">Horário Escolhido:</div>
+          <div class="info-data">Horário Selecionado:</div>
           <div class="info-destaque" id="txtResumoSelecao">--/-- às --:--</div>
         </div>
         <button class="btn-alterar" type="button" onclick="alterarHorario()">✏️ Alterar</button>
@@ -267,22 +260,22 @@
 
       <form id="formAgendamento">
         <div class="form-group">
-          <label for="nome">Seu Nome Completo:</label>
-          <input type="text" id="nome" required placeholder="Ex: João Silva">
+          <label for="nome">Nome Completo:</label>
+          <input type="text" id="nome" required placeholder="Seu nome">
         </div>
 
         <div class="form-group">
           <label for="loja">Nome da Sua Loja:</label>
-          <input type="text" id="loja" required placeholder="Ex: Mamed Store">
+          <input type="text" id="loja" required placeholder="Nome da loja">
         </div>
 
         <div class="form-group">
-          <label for="whatsapp">WhatsApp (com DDD):</label>
-          <input type="tel" id="whatsapp" required placeholder="Ex: 14999999999">
+          <label for="whatsapp">WhatsApp com DDD:</label>
+          <input type="tel" id="whatsapp" required placeholder="Ex: 14999998888">
         </div>
 
         <div class="form-group">
-          <label for="email">E-mail Comercial:</label>
+          <label for="email">E-mail comercial:</label>
           <input type="email" id="email" required placeholder="seuemail@exemplo.com">
         </div>
 
@@ -296,21 +289,25 @@
           </select>
         </div>
 
-        <!-- ACEITE DE DADOS / LGPD -->
         <div class="box-lgpd">
           <input type="checkbox" id="aceiteTermos" required>
           <label for="aceiteTermos">
-            Concordo com o uso dos meus dados para o agendamento da reunião e contato da equipe, de acordo com os <a href="/termos.html" target="_blank">Termos de Uso e Privacidade</a>.
+            Concordo com o uso dos meus dados para o agendamento e suporte, conforme os <a href="/termos.html" target="_blank">Termos e Condições</a>.
           </label>
         </div>
 
         <button type="submit" class="btn-submit" id="btnSubmit">
-          🚀 Confirmar Agendamento
+          ⚡ Confirmar Agendamento VIP
         </button>
       </form>
     </div>
 
     <div id="statusMsg" class="status-msg"></div>
+
+    <!-- MUDANÇA DE VERSÃO PARA CONFIRMAÇÃO DO DEPLOY -->
+    <div class="version-footer">
+      Versão: <b>v1.0.5 - Meet UX</b>
+    </div>
   </div>
 
   <script>
@@ -326,13 +323,12 @@
 
     let horaSelecionada = null;
 
-    // Define data mínima como hoje
     const hoje = new Date().toISOString().split('T')[0];
     dataInput.value = hoje;
     dataInput.min = hoje;
 
     async function buscarHorariosOcupados(dataStr) {
-      gridHorarios.innerHTML = '<div style="grid-column: span 3; text-align: center; color: #94a3b8; padding: 10px;">Buscando horários...</div>';
+      gridHorarios.innerHTML = '<div style="grid-column: span 3; text-align: center; color: #94a3b8; font-size: 13px;">Buscando horários...</div>';
       
       try {
         const res = await fetch(`/api/agendar?data=${dataStr}`);
@@ -358,21 +354,15 @@
         });
 
       } catch (err) {
-        console.error('Erro ao buscar horários:', err);
-        gridHorarios.innerHTML = '<div style="grid-column: span 3; text-align: center; color: #ef4444;">Erro ao carregar horários.</div>';
+        gridHorarios.innerHTML = '<div style="grid-column: span 3; text-align: center; color: #ef4444; font-size: 13px;">Erro ao carregar horários.</div>';
       }
     }
 
     function selecionarHorario(dataStr, hora) {
       horaSelecionada = hora;
-
-      // Formata a data para exibir (Ex: 24/07/2026)
       const partes = dataStr.split('-');
-      const dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+      txtResumoSelecao.textContent = `${partes[2]}/${partes[1]}/${partes[0]} às ${hora}h`;
 
-      txtResumoSelecao.textContent = `${dataFormatada} às ${hora}h`;
-
-      // Esconde a grade de escolha e mostra o formulário limpo
       secaoSelecao.style.display = 'none';
       secaoFormulario.style.display = 'block';
     }
@@ -387,7 +377,6 @@
       buscarHorariosOcupados(e.target.value);
     });
 
-    // Submissão do Formulário
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -416,24 +405,21 @@
         const result = await response.json();
 
         if (result.success) {
-          // Redireciona para a sala VIP personalizada do lojista
           window.location.href = result.meetLink;
         } else {
           statusMsg.style.color = '#ef4444';
-          statusMsg.textContent = result.error || 'Erro ao realizar agendamento.';
+          statusMsg.textContent = result.error || 'Erro ao agendar.';
           btnSubmit.disabled = false;
-          btnSubmit.textContent = '🚀 Confirmar Agendamento';
+          btnSubmit.innerHTML = '⚡ Confirmar Agendamento VIP';
         }
       } catch (err) {
-        console.error('Erro na submissão:', err);
         statusMsg.style.color = '#ef4444';
-        statusMsg.textContent = 'Erro de conexão com o servidor.';
+        statusMsg.textContent = 'Erro de conexão.';
         btnSubmit.disabled = false;
-        btnSubmit.textContent = '🚀 Confirmar Agendamento';
+        btnSubmit.innerHTML = '⚡ Confirmar Agendamento VIP';
       }
     });
 
-    // Inicialização
     buscarHorariosOcupados(hoje);
   </script>
 
