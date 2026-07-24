@@ -94,6 +94,7 @@
       text-align: left;
       font-size: 0.9rem;
       border-bottom: 1px solid var(--border);
+      vertical-align: top;
     }
 
     th {
@@ -104,23 +105,28 @@
       letter-spacing: 0.5px;
     }
 
-    tr:last-child td {
-      border-bottom: none;
+    .evento-titulo {
+      font-weight: bold;
+      color: #f8fafc;
+      margin-bottom: 4px;
     }
 
-    .btn-zap {
+    .evento-desc {
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      white-space: pre-line;
+    }
+
+    .btn-meet {
       display: inline-block;
       padding: 6px 12px;
-      background-color: var(--success);
+      background-color: #2563eb;
       color: white;
       text-decoration: none;
       border-radius: 4px;
       font-size: 0.8rem;
       font-weight: bold;
-    }
-
-    .btn-zap:hover {
-      opacity: 0.9;
+      margin-top: 6px;
     }
 
     .empty-state {
@@ -147,9 +153,9 @@
       <table>
         <thead>
           <tr>
-            <th>Horário</th>
-            <th>Loja / Detalhes do Evento</th>
-            <th>Ação</th>
+            <th style="width: 15%;">Horário</th>
+            <th style="width: 60%;">Detalhes do Agendamento</th>
+            <th style="width: 25%;">Link do Meet</th>
           </tr>
         </thead>
         <tbody id="admin-tbody">
@@ -169,7 +175,6 @@
     const hoje = new Date().toISOString().split('T')[0];
     adminData.value = hoje;
 
-    // Carrega dados iniciais de hoje
     carregarAgendamentosAdmin();
 
     adminData.addEventListener('change', carregarAgendamentosAdmin);
@@ -183,23 +188,26 @@
       try {
         const response = await fetch(`/api/agendar?data=${data}`);
         const result = await response.json();
-        const ocupados = result.ocupados || [];
+        const detalhes = result.detalhes || [];
 
-        if (ocupados.length === 0) {
+        if (detalhes.length === 0) {
           adminTbody.innerHTML = '<tr><td colspan="3" class="empty-state">Nenhum agendamento encontrado para esta data.</td></tr>';
           return;
         }
 
         adminTbody.innerHTML = '';
 
-        ocupados.forEach(hora => {
+        detalhes.forEach(item => {
           const tr = document.createElement('tr');
           
           tr.innerHTML = `
-            <td style="font-weight: bold; color: #38bdf8;">${hora}</td>
-            <td>Reunião Agendada no Google Calendar</td>
+            <td style="font-weight: bold; color: #38bdf8;">${item.horario || 'Dia todo'}</td>
             <td>
-              <span style="font-size: 0.8rem; color: #94a3b8;">Cadastrado</span>
+              <div class="evento-titulo">${item.titulo}</div>
+              <div class="evento-desc">${item.descricao}</div>
+            </td>
+            <td>
+              ${item.meetLink !== '#' ? `<a href="${item.meetLink}" target="_blank" class="btn-meet">🎥 Entrar no Meet</a>` : '<span style="color: #94a3b8;">Sem link</span>'}
             </td>
           `;
 
