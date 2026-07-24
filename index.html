@@ -89,6 +89,14 @@
       border-color: #58a6ff;
     }
 
+    .error-msg {
+      color: #f85149;
+      font-size: 13px;
+      margin-top: -8px;
+      margin-bottom: 12px;
+      display: none;
+    }
+
     .slots-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
@@ -229,8 +237,11 @@
       <div class="step-card">
         <h3>3. SEUS DADOS E DA LOJA:</h3>
         <input type="text" id="nome" placeholder="Seu nome completo" required>
-        <input type="email" id="email" placeholder="Seu melhor e-mail (para receber o convite)" required>
         
+        <input type="email" id="email" placeholder="Seu melhor e-mail" required>
+        <input type="email" id="emailConfirm" placeholder="Confirme seu e-mail" required>
+        <div id="emailError" class="error-msg">⚠️ Os e-mails digitados não coincidem.</div>
+
         <select id="funcao" required>
           <option value="" disabled selected>Selecione sua função na loja...</option>
           <option value="Proprietário(a)">Proprietário(a) / Sócio(a)</option>
@@ -263,6 +274,9 @@
     const formAgendamento = document.getElementById('formAgendamento');
     const successCard = document.getElementById('successCard');
     const meetLinkBtn = document.getElementById('meetLinkBtn');
+    const emailInput = document.getElementById('email');
+    const emailConfirmInput = document.getElementById('emailConfirm');
+    const emailError = document.getElementById('emailError');
 
     let horarioSelecionado = null;
 
@@ -276,6 +290,22 @@
       "14:00", "15:00", "16:00", "17:00", "18:00",
       "19:00", "20:00", "21:00"
     ];
+
+    // Validação de E-mail em tempo real
+    function validarEmails() {
+      if (emailConfirmInput.value && emailInput.value !== emailConfirmInput.value) {
+        emailError.style.display = 'block';
+        emailConfirmInput.style.borderColor = '#f85149';
+        return false;
+      } else {
+        emailError.style.display = 'none';
+        emailConfirmInput.style.borderColor = '#30363d';
+        return true;
+      }
+    }
+
+    emailInput.addEventListener('input', validarEmails);
+    emailConfirmInput.addEventListener('input', validarEmails);
 
     // Consulta os horários ocupados ao mudar a data
     dataInput.addEventListener('change', async () => {
@@ -327,6 +357,12 @@
         return;
       }
 
+      if (!validarEmails()) {
+        alert('Os e-mails informados não coincidem. Por favor, verifique.');
+        emailConfirmInput.focus();
+        return;
+      }
+
       btnAgendar.disabled = true;
       btnAgendar.innerText = '⌛ Criando reunião no Google Meet...';
 
@@ -334,7 +370,7 @@
         data: dataInput.value,
         hora: horarioSelecionado,
         nome: document.getElementById('nome').value,
-        email: document.getElementById('email').value,
+        email: emailInput.value,
         funcao: document.getElementById('funcao').value,
         loja: document.getElementById('loja').value,
         whatsapp: document.getElementById('whatsapp').value
