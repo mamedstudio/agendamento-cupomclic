@@ -1,6 +1,7 @@
 import { google } from 'googleapis';
 
 export default async function handler(req, res) {
+  // Configuração de CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -15,13 +16,22 @@ export default async function handler(req, res) {
   }
 
   try {
-    const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
-    const privateKey = process.env.GOOGLE_PRIVATE_KEY
-      ? process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n')
-      : null;
+    let clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
+    let privateKey = process.env.GOOGLE_PRIVATE_KEY;
+
+    // Se estiver usando o JSON unificado da Vercel (GOOGLE_SERVICE_ACCOUNT)
+    if (process.env.GOOGLE_SERVICE_ACCOUNT) {
+      const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
+      clientEmail = credentials.client_email;
+      privateKey = credentials.private_key;
+    }
+
+    if (privateKey) {
+      privateKey = privateKey.replace(/\\n/g, '\n');
+    }
 
     if (!clientEmail || !privateKey) {
-      return res.status(500).json({ error: 'Credenciais do Google não configuradas.' });
+      return res.status(500).json({ error: 'Credenciais do Google não encontradas na Vercel.' });
     }
 
     const auth = new google.auth.JWT(
@@ -32,11 +42,13 @@ export default async function handler(req, res) {
     );
 
     const calendar = google.calendar({ version: 'v3', auth });
-    
-    // USA A AGENDA NATIVA DO ROBÔ (Sem trava de permissão do Workspace)
-    const calendarId = 'primary';
 
-    // GET: Consulta os horários ocupados
+    // Pega do ID configurado ou usa a agenda principal
+    const calendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
+
+    // ----------------------------------------------------
+    // METODO GET: Consulta os agendamentos do dia
+    // ----------------------------------------------------
     if (req.method === 'GET') {
       const { data } = req.query;
 
@@ -70,7 +82,9 @@ export default async function handler(req, res) {
       return res.status(200).json({ ocupados });
     }
 
-    // POST: Cria o agendamento no Google Calendar
+    // ----------------------------------------------------
+    // METODO POST: Cria o agendamento no Google Calendar
+    // ----------------------------------------------------
     if (req.method === 'POST') {
       const { data, hora, nome, email, funcao, loja, whatsapp } = req.body;
 
