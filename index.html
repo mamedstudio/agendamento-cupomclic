@@ -96,6 +96,12 @@
       transition: border-color 0.2s;
     }
 
+    /* Torna o campo de data clicável em toda a extensão e clareia o ícone nativo */
+    input[type="date"] {
+      cursor: pointer;
+      color-scheme: dark;
+    }
+
     input:focus, select:focus {
       border-color: #58a6ff;
     }
@@ -298,6 +304,15 @@
     // Define data mínima como hoje
     const hoje = new Date().toISOString().split('T')[0];
     dataInput.min = hoje;
+
+    // Força o calendário a abrir ao clicar em qualquer lugar do campo de data
+    dataInput.addEventListener('click', () => {
+      if ('showPicker' in HTMLInputElement.prototype) {
+        try {
+          dataInput.showPicker();
+        } catch (e) {}
+      }
+    });
 
     // Horários fixos oferecidos (09:00 às 21:00)
     const horariaosPadrao = [
