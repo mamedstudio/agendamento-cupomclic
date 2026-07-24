@@ -179,12 +179,13 @@
     .success-card h2 {
       color: #3fb950;
       font-size: 20px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .success-card p {
-      color: #8b949e;
-      font-size: 14px;
+      color: #c9d1d9;
+      font-size: 15px;
+      line-height: 1.5;
       margin-bottom: 20px;
     }
 
@@ -194,11 +195,11 @@
       align-items: center;
       gap: 8px;
       width: 100%;
-      padding: 14px;
+      padding: 15px;
       border-radius: 6px;
+      font-size: 16px;
       font-weight: bold;
       text-decoration: none;
-      margin-bottom: 12px;
       transition: opacity 0.2s;
     }
 
@@ -208,11 +209,6 @@
 
     .btn-whatsapp {
       background-color: #238636;
-      color: #ffffff;
-    }
-
-    .btn-meet {
-      background-color: #1f6beb;
       color: #ffffff;
     }
 
@@ -279,14 +275,12 @@
     <!-- CARD DE SUCESSO -->
     <div id="successCard" class="success-card">
       <h2>🎉 Agendamento Reservado!</h2>
-      <p id="successMsg">Sua reunião foi agendada com sucesso. Salve a confirmação com o link no seu WhatsApp para não esquecer!</p>
+      <p id="successMsg">
+        Será um prazer demonstrar a mais nova forma de melhorar suas vendas. Reunião agendada com sucesso!
+      </p>
       
       <a id="whatsappShareBtn" href="#" target="_blank" class="action-btn btn-whatsapp">
-        📲 Salvar / Enviar no meu WhatsApp
-      </a>
-
-      <a id="meetLinkBtn" href="#" target="_blank" class="action-btn btn-meet">
-        📹 Entrar / Testar Sala do Google Meet
+        📲 Salvar Confirmação no meu WhatsApp
       </a>
     </div>
   </div>
@@ -297,9 +291,7 @@
     const btnAgendar = document.getElementById('btnAgendar');
     const formAgendamento = document.getElementById('formAgendamento');
     const successCard = document.getElementById('successCard');
-    const meetLinkBtn = document.getElementById('meetLinkBtn');
     const whatsappShareBtn = document.getElementById('whatsappShareBtn');
-    const successMsg = document.getElementById('successMsg');
 
     let horarioSelecionado = null;
 
@@ -391,14 +383,16 @@
 
         if (res.ok && data.success) {
           formAgendamento.style.display = 'none';
-          meetLinkBtn.href = data.meetLink;
 
-          // Monta a mensagem para o WhatsApp do lojista guardar
-          const textoWa = `*Reunião Agendada - CupomClic*\n\n📅 Data: ${dataFormatada}\n⏰ Horário: ${horarioSelecionado}\n🏢 Loja: ${payload.loja}\n\n📹 *Link da Sala no Google Meet:*\n${data.meetLink}`;
+          // Texto formatado sem caracteres quebrados para o WhatsApp
+          const textoWa = `*Reunião Agendada - CupomClic*\n\n` +
+            `Será um prazer demonstrar a mais nova forma de melhorar suas vendas!\n\n` +
+            `📅 *Data:* ${dataFormatada}\n` +
+            `⏰ *Horário:* ${horarioSelecionado}\n` +
+            `🏢 *Loja:* ${payload.loja}\n\n` +
+            `📹 *Link da Sala no Google Meet:*\n${data.meetLink}`;
           
-          whatsappShareBtn.href = `https://wa.me/55${whatsappUser}?text=${encodeURIComponent(textoWa)}`;
-          
-          successMsg.innerText = `Reunião marcada para ${dataFormatada} às ${horarioSelecionado}. Clique no botão verde abaixo para enviar o comprovante com o link para o seu WhatsApp!`;
+          whatsappShareBtn.href = `https://api.whatsapp.com/send?phone=55${whatsappUser}&text=${encodeURIComponent(textoWa)}`;
           
           successCard.style.display = 'block';
         } else {
