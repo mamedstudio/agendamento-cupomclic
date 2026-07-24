@@ -84,7 +84,7 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ ocupados });
     }
 
-    // --- ROTA POST: Criar a reunião no Google Meet + Enviar Convite por E-mail ---
+    // --- ROTA POST: Criar a reunião no Google Meet ---
     if (req.method === 'POST') {
       const { data, hora, nome, email, funcao, loja, whatsapp } = req.body;
 
@@ -107,10 +107,6 @@ module.exports = async function handler(req, res) {
           dateTime: endDate.toISOString(),
           timeZone: 'America/Sao_Paulo',
         },
-        attendees: [
-          { email: email, displayName: nome },
-          { email: 'tokto@cupomclic.com', displayName: 'CupomClic' }
-        ],
         conferenceData: {
           createRequest: {
             requestId: `meet-${Date.now()}`,
@@ -123,7 +119,6 @@ module.exports = async function handler(req, res) {
         calendarId,
         requestBody: event,
         conferenceDataVersion: 1,
-        sendUpdates: 'all',
       });
 
       const meetLink = response.data.hangoutLink || response.data.htmlLink;
