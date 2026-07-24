@@ -1,7 +1,7 @@
 const { google } = require('googleapis');
 
-export default async function handler(req, res) {
-  // Configuração dos cabeçalhos para liberar requisições (CORS)
+module.exports = async function handler(req, res) {
+  // Liberar requisições (CORS)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -11,15 +11,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1. Tratamento seguro da chave privada e credenciais
     let rawCreds = process.env.GOOGLE_SERVICE_ACCOUNT;
     if (!rawCreds) {
-      return res.status(500).json({ error: 'GOOGLE_SERVICE_ACCOUNT não configurada.' });
+      return res.status(500).json({ error: 'Chave de acesso não configurada.' });
     }
 
     const credentials = typeof rawCreds === 'string' ? JSON.parse(rawCreds) : rawCreds;
-    
-    // Trata quebras de linha na private_key se necessário
     if (credentials.private_key) {
       credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
     }
@@ -35,7 +32,7 @@ export default async function handler(req, res) {
 
     // --- ROTA GET: Ler horários ocupados ---
     if (req.method === 'GET') {
-      const { data } = req.query; // Formato esperado: YYYY-MM-DD
+      const { data } = req.query;
       if (!data) return res.status(400).json({ error: 'Data não informada.' });
 
       const timeMin = new Date(`${data}T00:00:00-03:00`).toISOString();
@@ -69,7 +66,6 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Dados incompletos.' });
       }
 
-      // Monta data/hora de início e fim (duração de 30 minutos)
       const startIso = `${data}T${hora}:00-03:00`;
       const startDate = new Date(startIso);
       const endDate = new Date(startDate.getTime() + 30 * 60 * 1000);
@@ -96,7 +92,7 @@ export default async function handler(req, res) {
       const response = await calendar.events.insert({
         calendarId,
         requestBody: event,
-        conferenceDataVersion: 1, // Obriga a geração do link do Google Meet
+        conferenceDataVersion: 1,
       });
 
       const meetLink = response.data.hangoutLink || response.data.htmlLink;
@@ -111,10 +107,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método não permitido.' });
 
   } catch (error) {
-    console.error('Erro detalhado na API Calendar:', error);
+    console.error('Erro na API Calendar:', error);
     return res.status(500).json({ 
-      error: 'Erro interno no servidor de agendamento.', 
+      error: 'Erro ao criar evento.', 
       details: error.message || error.toString() 
     });
   }
-}
+};
