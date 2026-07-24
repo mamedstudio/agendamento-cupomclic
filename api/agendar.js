@@ -41,9 +41,11 @@ export default async function handler(req, res) {
     );
 
     const calendar = google.calendar({ version: 'v3', auth });
+    
+    // Força uso estrito da agenda primária do robô
     const calendarId = 'primary';
 
-    // BASE DA URL PARA REDIRECIONAMENTO COM ID ALEATÓRIO
+    // URL da página de redirecionamento que criamos
     const BASE_URL_SALA = 'https://agendamento-cupomclic.vercel.app/sala.html';
 
     // ----------------------------------------------------
@@ -69,7 +71,7 @@ export default async function handler(req, res) {
 
       const events = response.data.items || [];
 
-      // Horários ocupados para desabilitar os botões no formulário
+      // Horários ocupados para o formulário público
       const ocupados = events.map(event => {
         if (event.start && event.start.dateTime) {
           const date = new Date(event.start.dateTime);
@@ -80,7 +82,7 @@ export default async function handler(req, res) {
         return null;
       }).filter(Boolean);
 
-      // Detalhes completos para renderizar a tabela no Painel Admin (/admin.html)
+      // Detalhes completos para popular a tabela no Admin (/admin.html)
       const detalhes = events.map(event => {
         let horaStr = '';
         if (event.start && event.start.dateTime) {
@@ -90,13 +92,14 @@ export default async function handler(req, res) {
           horaStr = `${horas}:${minutos}`;
         }
 
-        // Tenta extrair o link gerado na descrição do evento; se não encontrar, gera um link com o ID do evento
+        // Tenta encontrar a URL no texto da descrição; caso contrário gera uma limpa
         let meetLink = '';
-        const match = event.description ? event.description.match(/https?:\/\/[^\s]+sala\.html[^\s]*/) : null;
-        
-        if (match) {
-          meetLink = match[0];
-        } else {
+        if (event.description) {
+          const match = event.description.match(/https?:\/\/[^\s]+sala\.html[^\s]*/);
+          if (match) meetLink = match[0];
+        }
+
+        if (!meetLink) {
           meetLink = `${BASE_URL_SALA}?id=cupom-${data.replace(/-/g, '')}-${event.id.substring(0, 6)}`;
         }
 
@@ -135,10 +138,11 @@ export default async function handler(req, res) {
       const endMStr = String(endM).padStart(2, '0');
       const endDateTime = `${data}T${endHStr}:${endMStr}:00-03:00`;
 
-      // Gerador de hash aleatório (ex: vip-8f3a1d)
+      // Gerador de link personalizado no formato da sua sala.html
       const hashAleatorio = Math.random().toString(36).substring(2, 8);
       const meetLinkCustom = `${BASE_URL_SALA}?id=cupom-${data.replace(/-/g, '')}-${hashAleatorio}`;
 
+      // OBJETO DO EVENTO 100% LIMPO (Zero campos de conferência nativa)
       const event = {
         summary: `Reunião VIP CupomClic - ${loja} (${nome})`,
         description: `Agendamento via Site CupomClic\n\nNome: ${nome}\nE-mail: ${email}\nFunção: ${funcao}\nLoja: ${loja}\nWhatsApp: ${whatsapp}\n\nLink da Sala: ${meetLinkCustom}`,
@@ -152,6 +156,7 @@ export default async function handler(req, res) {
         }
       };
 
+      // Chamada simples do insert sem o parâmetro conferenceDataVersion
       const createdEvent = await calendar.events.insert({
         calendarId: calendarId,
         resource: event
