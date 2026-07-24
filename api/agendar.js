@@ -107,7 +107,6 @@ module.exports = async function handler(req, res) {
           dateTime: endDate.toISOString(),
           timeZone: 'America/Sao_Paulo',
         },
-        // Adiciona o lojista e você como convidados para o Google enviar os lembretes por e-mail
         attendees: [
           { email: email, displayName: nome },
           { email: 'tokto@cupomclic.com', displayName: 'CupomClic' }
@@ -124,7 +123,7 @@ module.exports = async function handler(req, res) {
         calendarId,
         requestBody: event,
         conferenceDataVersion: 1,
-        sendUpdates: 'all', // Faz o Google disparar os e-mails de convite/lembrete automaticamente
+        sendUpdates: 'all',
       });
 
       const meetLink = response.data.hangoutLink || response.data.htmlLink;
