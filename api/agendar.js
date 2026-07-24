@@ -19,7 +19,6 @@ export default async function handler(req, res) {
     let clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
     let privateKey = process.env.GOOGLE_PRIVATE_KEY;
 
-    // Se estiver usando o JSON unificado da Vercel (GOOGLE_SERVICE_ACCOUNT)
     if (process.env.GOOGLE_SERVICE_ACCOUNT) {
       const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
       clientEmail = credentials.client_email;
@@ -43,7 +42,6 @@ export default async function handler(req, res) {
 
     const calendar = google.calendar({ version: 'v3', auth });
 
-    // Pega do ID configurado ou usa a agenda principal
     const calendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
 
     // ----------------------------------------------------
@@ -119,7 +117,7 @@ export default async function handler(req, res) {
         conferenceData: {
           createRequest: {
             requestId: `cupomclic-${Date.now()}`,
-            conferenceSolutionKey: { type: 'hangoutsMeet' },
+            conferenceSolutionKey: { type: 'eventHangout' },
           },
         },
       };
@@ -130,6 +128,7 @@ export default async function handler(req, res) {
         conferenceDataVersion: 1,
       });
 
+      // Pega o link do Meet gerado ou o link direto do evento no Calendar
       const meetLink = createdEvent.data.hangoutLink || createdEvent.data.htmlLink;
 
       return res.status(200).json({
