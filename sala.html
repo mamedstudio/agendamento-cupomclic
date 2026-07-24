@@ -39,33 +39,37 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    a {
-      color: #38bdf8;
+    .btn-entrar {
+      display: inline-block;
+      background-color: #22c55e;
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 8px;
       text-decoration: none;
       font-weight: bold;
+      margin-top: 15px;
     }
   </style>
 </head>
 <body>
   <div class="card">
     <h2>🚀 CupomClic</h2>
-    <p>Conectando você à sua Reunião VIP...</p>
+    <p>Sua Reunião VIP está pronta!</p>
     <div class="spinner"></div>
-    <p style="font-size: 13px; color: #94a3b8;">
-      Se não for redirecionado automaticamente, <a id="link-direto" href="#">clique aqui</a>.
-    </p>
+    <a id="link-meet" class="btn-entrar" href="#">Clique aqui para Entrar no Meet</a>
   </div>
 
   <script>
-    // SALA OFICIAL DO GOOGLE MEET
+    // Link direto da sala
     const SALA_MEET = 'https://meet.google.com/nco-fgqq-ucz';
 
-    document.getElementById('link-direto').href = SALA_MEET;
+    const linkElem = document.getElementById('link-meet');
+    linkElem.href = SALA_MEET;
 
-    // Redireciona em 1.5 segundos
+    // Redirecionamento direto
     setTimeout(() => {
-      window.location.href = SALA_MEET;
-    }, 1500);
+      window.location.replace(SALA_MEET);
+    }, 1200);
   </script>
 </body>
 </html>
