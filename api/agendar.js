@@ -42,7 +42,7 @@ export default async function handler(req, res) {
 
     const calendar = google.calendar({ version: 'v3', auth });
     
-    // FIXADO NA AGENDA PRINCIPAL DO ROBÔ (Sem travas de permissão do Workspace)
+    // Sempre grava e consulta na agenda nativa do robô
     const calendarId = 'primary';
 
     // ----------------------------------------------------
@@ -68,7 +68,7 @@ export default async function handler(req, res) {
 
       const events = response.data.items || [];
 
-      // Horários bloqueados para o formulário
+      // Lista de horários ocupados para desabilitar os botões no formulário
       const ocupados = events.map(event => {
         if (event.start && event.start.dateTime) {
           const date = new Date(event.start.dateTime);
@@ -79,7 +79,7 @@ export default async function handler(req, res) {
         return null;
       }).filter(Boolean);
 
-      // Dados estruturados para popular a tabela do Painel Admin (/admin.html)
+      // Extração rigorosa do link do Google Meet para o Painel Admin
       const detalhes = events.map(event => {
         let horaStr = '';
         if (event.start && event.start.dateTime) {
@@ -89,12 +89,24 @@ export default async function handler(req, res) {
           horaStr = `${horas}:${minutos}`;
         }
 
+        // Tenta pegar o hangoutLink direto ou varre os entryPoints por um link de video/meet
+        let urlMeet = event.hangoutLink;
+        if (!urlMeet && event.conferenceData && event.conferenceData.entryPoints) {
+          const videoEntry = event.conferenceData.entryPoints.find(e => e.entryPointType === 'video');
+          if (videoEntry) urlMeet = videoEntry.uri;
+        }
+
+        // Se não houver conferência gerada, gera a sala pública do Meet no domínio da sala
+        if (!urlMeet) {
+          urlMeet = `https://meet.google.com/cupomclic-${data.replace(/-/g, '')}-${horaStr.replace(':', '')}`;
+        }
+
         return {
           id: event.id,
           horario: horaStr,
           titulo: event.summary || 'Sem título',
           descricao: event.description || '',
-          meetLink: event.hangoutLink || event.htmlLink || '#'
+          meetLink: urlMeet
         };
       });
 
@@ -124,6 +136,7 @@ export default async function handler(req, res) {
       const endMStr = String(endM).padStart(2, '0');
       const endDateTime = `${data}T${endHStr}:${endMStr}:00-03:00`;
 
+      // Estrutura do evento configurada para requisitar sala do Meet
       const event = {
         summary: `Reunião VIP CupomClic - ${loja} (${nome})`,
         description: `Agendamento via Site CupomClic\n\nNome: ${nome}\nE-mail: ${email}\nFunção: ${funcao}\nLoja: ${loja}\nWhatsApp: ${whatsapp}`,
@@ -134,17 +147,32 @@ export default async function handler(req, res) {
         end: {
           dateTime: endDateTime,
           timeZone: 'America/Sao_Paulo',
+        },
+        conferenceData: {
+          createRequest: {
+            requestId: `cupomclic-meet-${Date.now()}`,
+            conferenceSolutionKey: { type: 'hangoutsMeet' }
+          }
         }
       };
 
       const createdEvent = await calendar.events.insert({
         calendarId: calendarId,
-        resource: event
+        resource: event,
+        conferenceDataVersion: 1 // Obrigatório para forçar a criação e retorno do Meet
       });
 
-      // Link direto do Meet formatado limpo para o WhatsApp
-      const meetLink = createdEvent.data.hangoutLink || 
-                       `https://meet.google.com/lookup/cupomclic-${data.replace(/-/g, '')}`;
+      // Busca o link de vídeo gerado
+      let meetLink = createdEvent.data.hangoutLink;
+      if (!meetLink && createdEvent.data.conferenceData && createdEvent.data.conferenceData.entryPoints) {
+        const videoEntry = createdEvent.data.conferenceData.entryPoints.find(e => e.entryPointType === 'video');
+        if (videoEntry) meetLink = videoEntry.uri;
+      }
+
+      // Fallback em formato de sala direta do Google Meet
+      if (!meetLink) {
+        meetLink = `https://meet.google.com/cupomclic-${data.replace(/-/g, '')}-${hora.replace(':', '')}`;
+      }
 
       return res.status(200).json({
         success: true,
