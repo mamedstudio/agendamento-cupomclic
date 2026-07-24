@@ -41,7 +41,6 @@ export default async function handler(req, res) {
     );
 
     const calendar = google.calendar({ version: 'v3', auth });
-
     const calendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
 
     // ----------------------------------------------------
@@ -113,23 +112,16 @@ export default async function handler(req, res) {
         end: {
           dateTime: endDateTime,
           timeZone: 'America/Sao_Paulo',
-        },
-        conferenceData: {
-          createRequest: {
-            requestId: `cupomclic-${Date.now()}`,
-            conferenceSolutionKey: { type: 'eventHangout' },
-          },
-        },
+        }
       };
 
       const createdEvent = await calendar.events.insert({
         calendarId: calendarId,
-        resource: event,
-        conferenceDataVersion: 1,
+        resource: event
       });
 
-      // Pega o link do Meet gerado ou o link direto do evento no Calendar
-      const meetLink = createdEvent.data.hangoutLink || createdEvent.data.htmlLink;
+      // Se houver hangoutLink usa ele; caso contrário, usa o link direto do evento no Calendar
+      const meetLink = createdEvent.data.hangoutLink || createdEvent.data.htmlLink || 'https://calendar.google.com';
 
       return res.status(200).json({
         success: true,
