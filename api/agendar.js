@@ -41,12 +41,17 @@ export default async function handler(req, res) {
     );
 
     const calendar = google.calendar({ version: 'v3', auth });
-    
-    // Força uso estrito da agenda primária do robô
     const calendarId = 'primary';
 
-    // URL da página de redirecionamento que criamos
     const BASE_URL_SALA = 'https://agendamento-cupomclic.vercel.app/sala.html';
+
+    // Função para extrair HH:MM sem contaminação de fuso horário do servidor
+    const extrairHoraExata = (dateTimeStr) => {
+      if (!dateTimeStr) return '';
+      // Procura o padrão T15:00:00 na string de data
+      const match = dateTimeStr.match(/T(\d{2}:\d{2})/);
+      return match ? match[1] : '';
+    };
 
     // ----------------------------------------------------
     // METODO GET: Consulta os agendamentos (Formulário + Admin)
@@ -67,32 +72,25 @@ export default async function handler(req, res) {
         timeMax: timeMax,
         singleEvents: true,
         orderBy: 'startTime',
+        timeZone: 'America/Sao_Paulo'
       });
 
       const events = response.data.items || [];
 
-      // Horários ocupados para o formulário público
+      // Mapeia horários ocupados cravados em fuso de SP
       const ocupados = events.map(event => {
-        if (event.start && event.start.dateTime) {
-          const date = new Date(event.start.dateTime);
-          const horas = String(date.getHours()).padStart(2, '0');
-          const minutos = String(date.getMinutes()).padStart(2, '0');
-          return `${horas}:${minutos}`;
+        if (event.start) {
+          const rawTime = event.start.dateTime || event.start.date;
+          return extrairHoraExata(rawTime);
         }
         return null;
       }).filter(Boolean);
 
-      // Detalhes completos para popular a tabela no Admin (/admin.html)
+      // Dados estruturados para o Painel Admin
       const detalhes = events.map(event => {
-        let horaStr = '';
-        if (event.start && event.start.dateTime) {
-          const date = new Date(event.start.dateTime);
-          const horas = String(date.getHours()).padStart(2, '0');
-          const minutos = String(date.getMinutes()).padStart(2, '0');
-          horaStr = `${horas}:${minutos}`;
-        }
+        const rawTime = event.start ? (event.start.dateTime || event.start.date) : '';
+        const horaStr = extrairHoraExata(rawTime);
 
-        // Tenta encontrar a URL no texto da descrição; caso contrário gera uma limpa
         let meetLink = '';
         if (event.description) {
           const match = event.description.match(/https?:\/\/[^\s]+sala\.html[^\s]*/);
@@ -138,11 +136,9 @@ export default async function handler(req, res) {
       const endMStr = String(endM).padStart(2, '0');
       const endDateTime = `${data}T${endHStr}:${endMStr}:00-03:00`;
 
-      // Gerador de link personalizado no formato da sua sala.html
       const hashAleatorio = Math.random().toString(36).substring(2, 8);
       const meetLinkCustom = `${BASE_URL_SALA}?id=cupom-${data.replace(/-/g, '')}-${hashAleatorio}`;
 
-      // OBJETO DO EVENTO 100% LIMPO (Zero campos de conferência nativa)
       const event = {
         summary: `Reunião VIP CupomClic - ${loja} (${nome})`,
         description: `Agendamento via Site CupomClic\n\nNome: ${nome}\nE-mail: ${email}\nFunção: ${funcao}\nLoja: ${loja}\nWhatsApp: ${whatsapp}\n\nLink da Sala: ${meetLinkCustom}`,
@@ -156,7 +152,6 @@ export default async function handler(req, res) {
         }
       };
 
-      // Chamada simples do insert sem o parâmetro conferenceDataVersion
       const createdEvent = await calendar.events.insert({
         calendarId: calendarId,
         resource: event
