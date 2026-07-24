@@ -41,10 +41,12 @@ export default async function handler(req, res) {
     );
 
     const calendar = google.calendar({ version: 'v3', auth });
-    const calendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
+    
+    // FIXADO NA AGENDA PRINCIPAL DO ROBÔ (Sem travas de permissão do Workspace)
+    const calendarId = 'primary';
 
     // ----------------------------------------------------
-    // METODO GET: Consulta os agendamentos do dia (Formulário + Admin)
+    // METODO GET: Consulta os agendamentos (Formulário + Admin)
     // ----------------------------------------------------
     if (req.method === 'GET') {
       const { data } = req.query;
@@ -66,7 +68,7 @@ export default async function handler(req, res) {
 
       const events = response.data.items || [];
 
-      // Array para o formulário (bloquear botões)
+      // Horários bloqueados para o formulário
       const ocupados = events.map(event => {
         if (event.start && event.start.dateTime) {
           const date = new Date(event.start.dateTime);
@@ -77,7 +79,7 @@ export default async function handler(req, res) {
         return null;
       }).filter(Boolean);
 
-      // Array para o Painel Admin (renderizar a tabela)
+      // Dados estruturados para popular a tabela do Painel Admin (/admin.html)
       const detalhes = events.map(event => {
         let horaStr = '';
         if (event.start && event.start.dateTime) {
@@ -100,7 +102,7 @@ export default async function handler(req, res) {
     }
 
     // ----------------------------------------------------
-    // METODO POST: Cria o agendamento no Google Calendar
+    // METODO POST: Criação do Agendamento pelo Formulário
     // ----------------------------------------------------
     if (req.method === 'POST') {
       const { data, hora, nome, email, funcao, loja, whatsapp } = req.body;
@@ -132,25 +134,17 @@ export default async function handler(req, res) {
         end: {
           dateTime: endDateTime,
           timeZone: 'America/Sao_Paulo',
-        },
-        conferenceData: {
-          createRequest: {
-            requestId: `cupomclic-${Date.now()}`,
-            conferenceSolutionKey: { type: 'addOn' }
-          }
         }
       };
 
       const createdEvent = await calendar.events.insert({
         calendarId: calendarId,
-        resource: event,
-        conferenceDataVersion: 1
+        resource: event
       });
 
-      // Pega prioritariamente o link do Meet gerado
+      // Link direto do Meet formatado limpo para o WhatsApp
       const meetLink = createdEvent.data.hangoutLink || 
-                       (createdEvent.data.conferenceData?.entryPoints?.find(e => e.entryPointType === 'video')?.uri) || 
-                       createdEvent.data.htmlLink;
+                       `https://meet.google.com/lookup/cupomclic-${data.replace(/-/g, '')}`;
 
       return res.status(200).json({
         success: true,
