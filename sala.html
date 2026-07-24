@@ -21,14 +21,14 @@
     }
     .card {
       background-color: #1e293b;
-      padding: 30px 20px;
+      padding: 35px 25px;
       border-radius: 16px;
       max-width: 400px;
       width: 100%;
       border: 1px solid #334155;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
-    .logo { font-size: 26px; font-weight: bold; margin-bottom: 6px; }
+    .logo { font-size: 28px; font-weight: bold; margin-bottom: 6px; }
     .subtitulo { color: #94a3b8; font-size: 14px; margin-bottom: 25px; }
     
     .btn-entrar {
@@ -36,38 +36,42 @@
       width: 100%;
       background-color: #22c55e;
       color: #ffffff;
-      padding: 16px;
-      border-radius: 10px;
+      padding: 18px 20px;
+      border-radius: 12px;
       text-decoration: none;
       font-weight: bold;
-      font-size: 17px;
-      margin-bottom: 15px;
+      font-size: 18px;
+      box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4);
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+    .btn-entrar:active {
+      background-color: #16a34a;
+      transform: scale(0.98);
     }
 
-    .box-codigo {
-      background-color: #0f172a;
-      border: 1px dashed #334155;
-      padding: 15px;
-      border-radius: 10px;
+    .dica-mobile {
+      font-size: 13px;
+      color: #94a3b8;
       margin-top: 20px;
+      line-height: 1.4;
     }
-    .codigo-txt {
-      font-family: monospace;
-      font-size: 18px;
-      color: #38bdf8;
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #38bdf8;
+      color: #0f172a;
+      padding: 12px 20px;
+      border-radius: 8px;
       font-weight: bold;
-      letter-spacing: 1px;
-      margin: 5px 0;
-    }
-    .btn-copiar {
-      background: #334155;
-      color: #fff;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
-      font-size: 12px;
-      cursor: pointer;
-      margin-top: 5px;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: none;
+      z-index: 1000;
     }
   </style>
 </head>
@@ -77,21 +81,47 @@
     <div class="logo">🚀 CupomClic</div>
     <div class="subtitulo">Sua Reunião VIP está pronta</div>
 
-    <a class="btn-entrar" href="https://meet.google.com/nco-fgqq-ucz" target="_blank" rel="noopener noreferrer">
+    <button class="btn-entrar" id="btnEntrar" onclick="acessarSala()">
       👉 ENTRAR NA REUNIÃO
-    </a>
+    </button>
 
-    <div class="box-codigo">
-      <div style="font-size: 12px; color: #94a3b8;">Se o app pedir o código da reunião:</div>
-      <div class="codigo-txt" id="codigoSala">nco-fgqq-ucz</div>
-      <button class="btn-copiar" onclick="copiarCodigo()">📋 Copiar Código</button>
+    <div class="dica-mobile">
+      O código da sala (<b>nco-fgqq-ucz</b>) é copiado automaticamente ao clicar. Se o app pedir, basta colar!
     </div>
   </div>
 
+  <div id="toast" class="toast">📋 Código copiado! Abrindo a sala...</div>
+
   <script>
-    function copiarCodigo() {
-      navigator.clipboard.writeText('nco-fgqq-ucz');
-      alert('Código nco-fgqq-ucz copiado com sucesso!');
+    const CODIGO_SALA = 'nco-fgqq-ucz';
+    const URL_MEET = 'https://meet.google.com/nco-fgqq-ucz';
+
+    async function acessarSala() {
+      // 1. Copia o código da sala de forma transparente
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(CODIGO_SALA);
+        } else {
+          // Fallback para celulares antigos
+          const textArea = document.createElement("textarea");
+          textArea.value = CODIGO_SALA;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+        }
+      } catch (err) {
+        console.log('Não foi possível copiar automaticamente:', err);
+      }
+
+      // 2. Exibe o aviso visual rápido
+      const toast = document.getElementById('toast');
+      toast.style.display = 'block';
+
+      // 3. Redireciona para o Google Meet
+      setTimeout(() => {
+        window.location.href = URL_MEET;
+      }, 500);
     }
   </script>
 
