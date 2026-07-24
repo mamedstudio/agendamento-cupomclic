@@ -27,23 +27,21 @@ module.exports = async function handler(req, res) {
 
     const calendar = google.calendar({ version: 'v3', auth });
 
-    // --- ROTA DE SETUP: Executada uma única vez no navegador ---
+    // --- ROTA DE SETUP (Caso precise no futuro) ---
     if (req.method === 'GET' && req.query.setup === 'true') {
-      // 1. Robô cria a própria agenda
       const newCalendar = await calendar.calendars.insert({
         requestBody: { summary: 'Reuniões CupomClic (Robô)' },
       });
 
       const calendarId = newCalendar.data.id;
 
-      // 2. Robô compartilha essa agenda com o seu e-mail pessoal
       await calendar.acl.insert({
         calendarId,
         requestBody: {
           role: 'writer',
           scope: {
             type: 'user',
-            value: 'tokto@cupomclic.com', // Seu e-mail
+            value: 'tokto@cupomclic.com',
           },
         },
       });
@@ -111,7 +109,7 @@ module.exports = async function handler(req, res) {
         conferenceData: {
           createRequest: {
             requestId: `meet-${Date.now()}`,
-            conferenceSolutionKey: { type: 'hangoutsMeet' },
+            conferenceSolutionKey: { type: 'addOn' }, // Atualizado para o tipo aceito
           },
         },
       };
