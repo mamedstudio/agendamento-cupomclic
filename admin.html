@@ -14,10 +14,12 @@
       --border: #334155;
     }
 
+    * { box-sizing: border-box; }
+
     body {
       background-color: var(--bg-color);
       color: var(--text);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
       padding: 20px;
     }
@@ -31,6 +33,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
       margin-bottom: 25px;
       padding-bottom: 15px;
       border-bottom: 1px solid var(--border);
@@ -38,16 +42,23 @@
 
     h1 {
       margin: 0;
-      font-size: 24px;
+      font-size: 22px;
       color: var(--text);
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
     .date-picker-group {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       background: var(--card-bg);
-      padding: 10px 15px;
+      padding: 8px 12px;
       border-radius: 8px;
       border: 1px solid var(--border);
     }
@@ -56,9 +67,25 @@
       background: transparent;
       border: none;
       color: var(--text);
-      font-size: 16px;
+      font-size: 15px;
       outline: none;
       cursor: pointer;
+    }
+
+    .btn-toggle-passadas {
+      background-color: #334155;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-toggle-passadas:hover {
+      background-color: #475569;
     }
 
     .card {
@@ -84,12 +111,18 @@
       background-color: rgba(255,255,255,0.03);
       color: var(--text-muted);
       font-weight: 600;
-      font-size: 14px;
+      font-size: 13px;
       text-transform: uppercase;
     }
 
     tr:last-child td {
       border-bottom: none;
+    }
+
+    /* Estilo para Reuniões Passadas quando estiverem visíveis */
+    tr.evento-passado {
+      opacity: 0.45;
+      background-color: rgba(0,0,0,0.15);
     }
 
     .horario-badge {
@@ -100,6 +133,10 @@
       font-weight: bold;
       font-size: 14px;
       display: inline-block;
+    }
+
+    .horario-badge.passado {
+      background: #64748b;
     }
 
     .detalhes-titulo {
@@ -136,14 +173,14 @@
       padding: 40px;
       text-align: center;
       color: var(--text-muted);
-      font-size: 16px;
+      font-size: 15px;
     }
 
     .loading {
       padding: 40px;
       text-align: center;
       color: #38bdf8;
-      font-size: 16px;
+      font-size: 15px;
     }
   </style>
 </head>
@@ -152,14 +189,22 @@
   <div class="container">
     <header>
       <h1>🚀 Admin - Reuniões VIP CupomClic</h1>
-      <div class="date-picker-group">
-        <label for="dataSelect">Data:</label>
-        <input type="date" id="dataSelect">
+      
+      <div class="controls-group">
+        <button id="btnTogglePassadas" class="btn-toggle-passadas" onclick="alternarExibicaoPassadas()">
+          👁️ Mostrar Passadas
+        </button>
+
+        <div class="date-picker-group">
+          <label for="dataSelect" style="font-size: 13px; color: #94a3b8;">Data:</label>
+          <input type="date" id="dataSelect">
+        </div>
       </div>
     </header>
 
     <div class="card">
       <div id="loading" class="loading">Carregando agendamentos...</div>
+      
       <table id="tabelaAgendamentos" style="display: none;">
         <thead>
           <tr>
@@ -170,8 +215,9 @@
         </thead>
         <tbody id="listaCorpo"></tbody>
       </table>
+
       <div id="emptyState" class="empty-state" style="display: none;">
-        Nenhum agendamento encontrado para esta data.
+        Nenhuma reunião pendente para este horário/data.
       </div>
     </div>
   </div>
@@ -182,10 +228,20 @@
     const tabela = document.getElementById('tabelaAgendamentos');
     const listaCorpo = document.getElementById('listaCorpo');
     const emptyState = document.getElementById('emptyState');
+    const btnToggle = document.getElementById('btnTogglePassadas');
 
-    // Define a data inicial como hoje
+    let mostrarPassadas = false;
+    let agendamentosAtuais = [];
+
+    // Define a data inicial como hoje no fuso local
     const hoje = new Date().toISOString().split('T')[0];
     dataInput.value = hoje;
+
+    function alternarExibicaoPassadas() {
+      mostrarPassadas = !mostrarPassadas;
+      btnToggle.textContent = mostrarPassadas ? "🙈 Esconder Passadas" : "👁️ Mostrar Passadas";
+      renderizarTabela();
+    }
 
     async function carregarAgendamentos(dataStr) {
       loadingDiv.style.display = 'block';
@@ -200,11 +256,12 @@
         loadingDiv.style.display = 'none';
 
         if (!result.detalhes || result.detalhes.length === 0) {
+          emptyState.textContent = 'Nenhum agendamento encontrado para esta data.';
           emptyState.style.display = 'block';
           return;
         }
 
-        // Remove duplicidades por ID ou por Horário idêntico
+        // Remove duplicidades
         const unicosMap = new Map();
         result.detalhes.forEach(item => {
           const chave = item.id || item.horario;
@@ -213,31 +270,10 @@
           }
         });
 
-        const agendamentosLimpos = Array.from(unicosMap.values());
+        agendamentosAtuais = Array.from(unicosMap.values());
+        agendamentosAtuais.sort((a, b) => (a.horario > b.horario ? 1 : -1));
 
-        // Ordena por horário crescente
-        agendamentosLimpos.sort((a, b) => (a.horario > b.horario ? 1 : -1));
-
-        agendamentosLimpos.forEach(item => {
-          const tr = document.createElement('tr');
-
-          tr.innerHTML = `
-            <td>
-              <span class="horario-badge">${item.horario || '---'}</span>
-            </td>
-            <td>
-              <div class="detalhes-titulo">${item.titulo}</div>
-              <div class="detalhes-texto">${item.descricao}</div>
-            </td>
-            <td style="text-align: center;">
-              <a class="btn-meet" href="${item.meetLink}" target="_blank">📹 Entrar na Sala</a>
-            </td>
-          `;
-
-          listaCorpo.appendChild(tr);
-        });
-
-        tabela.style.display = 'table';
+        renderizarTabela();
 
       } catch (err) {
         console.error('Erro ao carregar dados:', err);
@@ -247,11 +283,67 @@
       }
     }
 
+    function renderizarTabela() {
+      listaCorpo.innerHTML = '';
+
+      const dataSelecionada = dataInput.value;
+      const ehHoje = (dataSelecionada === hoje);
+
+      // Pega hora e minuto atuais (ex: 14:30)
+      const agora = new Date();
+      const horaAtualStr = String(agora.getHours()).padStart(2, '0') + ':' + String(agora.getMinutes()).padStart(2, '0');
+
+      let visiveisContador = 0;
+
+      agendamentosAtuais.forEach(item => {
+        // Uma reunião é considerada passada se for HOJE e o horário da reunião for menor que a hora atual
+        const ehPassado = ehHoje && (item.horario < horaAtualStr);
+
+        // Se for passada e a opção "mostrarPassadas" estiver desligada, oculta da tela
+        if (ehPassado && !mostrarPassadas) {
+          return;
+        }
+
+        visiveisContador++;
+
+        const tr = document.createElement('tr');
+        if (ehPassado) {
+          tr.classList.add('evento-passado');
+        }
+
+        tr.innerHTML = `
+          <td>
+            <span class="horario-badge ${ehPassado ? 'passado' : ''}">${item.horario || '---'}</span>
+          </td>
+          <td>
+            <div class="detalhes-titulo">${item.titulo}</div>
+            <div class="detalhes-texto">${item.descricao}</div>
+          </td>
+          <td style="text-align: center;">
+            <a class="btn-meet" href="${item.meetLink}" target="_blank">📹 Entrar na Sala</a>
+          </td>
+        `;
+
+        listaCorpo.appendChild(tr);
+      });
+
+      if (visiveisContador === 0) {
+        tabela.style.display = 'none';
+        emptyState.textContent = ehHoje && !mostrarPassadas 
+          ? 'Todas as reuniões anteriores já passaram. Clique em "👁️ Mostrar Passadas" para visualizar.' 
+          : 'Nenhum agendamento encontrado para esta data.';
+        emptyState.style.display = 'block';
+      } else {
+        emptyState.style.display = 'none';
+        tabela.style.display = 'table';
+      }
+    }
+
     dataInput.addEventListener('change', (e) => {
       carregarAgendamentos(e.target.value);
     });
 
-    // Carrega os agendamentos do dia ao abrir
+    // Carrega inicial
     carregarAgendamentos(hoje);
   </script>
 
