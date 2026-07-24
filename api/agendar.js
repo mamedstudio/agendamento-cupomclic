@@ -11,8 +11,19 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1. Decodificar a chave privada da Conta de Serviço (salva na Vercel)
-    const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
+    // 1. Tratamento seguro da chave privada e credenciais
+    let rawCreds = process.env.GOOGLE_SERVICE_ACCOUNT;
+    if (!rawCreds) {
+      return res.status(500).json({ error: 'GOOGLE_SERVICE_ACCOUNT não configurada.' });
+    }
+
+    const credentials = typeof rawCreds === 'string' ? JSON.parse(rawCreds) : rawCreds;
+    
+    // Trata quebras de linha na private_key se necessário
+    if (credentials.private_key) {
+      credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
+    }
+
     const calendarId = process.env.GOOGLE_CALENDAR_ID;
 
     const auth = new google.auth.GoogleAuth({
@@ -65,12 +76,7 @@ export default async function handler(req, res) {
 
       const event = {
         summary: `Reunião VIP CupomClic - ${loja}`,
-        description: `
-📌 *Detalhes do Agendamento VIP*
-• *Loja:* ${loja}
-• *Responsável:* ${nome} (${funcao})
-• *WhatsApp:* ${whatsapp}
-        `.trim(),
+        description: `📌 Detalhes do Agendamento VIP\n• Loja: ${loja}\n• Responsável: ${nome} (${funcao})\n• WhatsApp: ${whatsapp}`,
         start: {
           dateTime: startDate.toISOString(),
           timeZone: 'America/Sao_Paulo',
@@ -89,8 +95,8 @@ export default async function handler(req, res) {
 
       const response = await calendar.events.insert({
         calendarId,
-        resource: event,
-        conferenceDataVersion: 1, // Obriga a criação do link do Google Meet
+        requestBody: event,
+        conferenceDataVersion: 1, // Obriga a geração do link do Google Meet
       });
 
       const meetLink = response.data.hangoutLink || response.data.htmlLink;
@@ -105,7 +111,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método não permitido.' });
 
   } catch (error) {
-    console.error('Erro na API Calendar:', error);
-    return res.status(500).json({ error: 'Erro interno no servidor de agendamento.', details: error.message });
+    console.error('Erro detalhado na API Calendar:', error);
+    return res.status(500).json({ 
+      error: 'Erro interno no servidor de agendamento.', 
+      details: error.message || error.toString() 
+    });
   }
 }
