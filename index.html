@@ -100,14 +100,6 @@
       border-color: #58a6ff;
     }
 
-    .error-msg {
-      color: #f85149;
-      font-size: 13px;
-      margin-top: -8px;
-      margin-bottom: 12px;
-      display: none;
-    }
-
     .slots-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
@@ -196,20 +188,32 @@
       margin-bottom: 20px;
     }
 
-    .meet-btn {
-      display: inline-block;
+    .action-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
       width: 100%;
       padding: 14px;
-      background-color: #1f6beb;
-      color: #ffffff;
-      text-decoration: none;
-      font-weight: bold;
       border-radius: 6px;
-      transition: background-color 0.2s;
+      font-weight: bold;
+      text-decoration: none;
+      margin-bottom: 12px;
+      transition: opacity 0.2s;
     }
 
-    .meet-btn:hover {
-      background-color: #388bfd;
+    .action-btn:hover {
+      opacity: 0.9;
+    }
+
+    .btn-whatsapp {
+      background-color: #238636;
+      color: #ffffff;
+    }
+
+    .btn-meet {
+      background-color: #1f6beb;
+      color: #ffffff;
     }
 
     .loading-text {
@@ -253,10 +257,7 @@
       <div class="step-card">
         <h3>3. SEUS DADOS E DA LOJA:</h3>
         <input type="text" id="nome" placeholder="Seu nome completo" required>
-        
-        <input type="email" id="email" placeholder="Seu melhor e-mail" required>
-        <input type="email" id="emailConfirm" placeholder="Confirme seu e-mail" required>
-        <div id="emailError" class="error-msg">⚠️ Os e-mails digitados não coincidem.</div>
+        <input type="email" id="email" placeholder="Seu e-mail de contato" required>
 
         <select id="funcao" required>
           <option value="" disabled selected>Selecione sua função na loja...</option>
@@ -277,9 +278,16 @@
 
     <!-- CARD DE SUCESSO -->
     <div id="successCard" class="success-card">
-      <h2>🎉 Agendamento Confirmado!</h2>
-      <p>Sua reunião foi reservada com sucesso no Google Calendar!</p>
-      <a id="meetLinkBtn" href="#" target="_blank" class="meet-btn">📹 Abrir Reunião no Google Meet</a>
+      <h2>🎉 Agendamento Reservado!</h2>
+      <p id="successMsg">Sua reunião foi agendada com sucesso. Salve a confirmação com o link no seu WhatsApp para não esquecer!</p>
+      
+      <a id="whatsappShareBtn" href="#" target="_blank" class="action-btn btn-whatsapp">
+        📲 Salvar / Enviar no meu WhatsApp
+      </a>
+
+      <a id="meetLinkBtn" href="#" target="_blank" class="action-btn btn-meet">
+        📹 Entrar / Testar Sala do Google Meet
+      </a>
     </div>
   </div>
 
@@ -290,9 +298,8 @@
     const formAgendamento = document.getElementById('formAgendamento');
     const successCard = document.getElementById('successCard');
     const meetLinkBtn = document.getElementById('meetLinkBtn');
-    const emailInput = document.getElementById('email');
-    const emailConfirmInput = document.getElementById('emailConfirm');
-    const emailError = document.getElementById('emailError');
+    const whatsappShareBtn = document.getElementById('whatsappShareBtn');
+    const successMsg = document.getElementById('successMsg');
 
     let horarioSelecionado = null;
 
@@ -306,22 +313,6 @@
       "14:00", "15:00", "16:00", "17:00", "18:00",
       "19:00", "20:00", "21:00"
     ];
-
-    // Validação de E-mail em tempo real
-    function validarEmails() {
-      if (emailConfirmInput.value && emailInput.value !== emailConfirmInput.value) {
-        emailError.style.display = 'block';
-        emailConfirmInput.style.borderColor = '#f85149';
-        return false;
-      } else {
-        emailError.style.display = 'none';
-        emailConfirmInput.style.borderColor = '#30363d';
-        return true;
-      }
-    }
-
-    emailInput.addEventListener('input', validarEmails);
-    emailConfirmInput.addEventListener('input', validarEmails);
 
     // Consulta os horários ocupados ao mudar a data
     dataInput.addEventListener('change', async () => {
@@ -373,23 +364,20 @@
         return;
       }
 
-      if (!validarEmails()) {
-        alert('Os e-mails informados não coincidem. Por favor, verifique.');
-        emailConfirmInput.focus();
-        return;
-      }
-
       btnAgendar.disabled = true;
       btnAgendar.innerText = '⌛ Criando reunião no Google Meet...';
+
+      const dataFormatada = dataInput.value.split('-').reverse().join('/');
+      const whatsappUser = document.getElementById('whatsapp').value.replace(/\D/g, '');
 
       const payload = {
         data: dataInput.value,
         hora: horarioSelecionado,
         nome: document.getElementById('nome').value,
-        email: emailInput.value,
+        email: document.getElementById('email').value,
         funcao: document.getElementById('funcao').value,
         loja: document.getElementById('loja').value,
-        whatsapp: document.getElementById('whatsapp').value
+        whatsapp: whatsappUser
       };
 
       try {
@@ -404,6 +392,14 @@
         if (res.ok && data.success) {
           formAgendamento.style.display = 'none';
           meetLinkBtn.href = data.meetLink;
+
+          // Monta a mensagem para o WhatsApp do lojista guardar
+          const textoWa = `*Reunião Agendada - CupomClic*\n\n📅 Data: ${dataFormatada}\n⏰ Horário: ${horarioSelecionado}\n🏢 Loja: ${payload.loja}\n\n📹 *Link da Sala no Google Meet:*\n${data.meetLink}`;
+          
+          whatsappShareBtn.href = `https://wa.me/55${whatsappUser}?text=${encodeURIComponent(textoWa)}`;
+          
+          successMsg.innerText = `Reunião marcada para ${dataFormatada} às ${horarioSelecionado}. Clique no botão verde abaixo para enviar o comprovante com o link para o seu WhatsApp!`;
+          
           successCard.style.display = 'block';
         } else {
           alert('Erro ao agendar: ' + (data.error || 'Erro desconhecido.'));
