@@ -1,7 +1,6 @@
 const { google } = require('googleapis');
 
 module.exports = async function handler(req, res) {
-  // Liberar requisições (CORS)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -27,34 +26,9 @@ module.exports = async function handler(req, res) {
     });
 
     const calendar = google.calendar({ version: 'v3', auth });
-
-    // --- ROTA DE SETUP (Instalação e criação de agenda) ---
-    if (req.method === 'GET' && req.query.setup === 'true') {
-      const newCalendar = await calendar.calendars.insert({
-        requestBody: { summary: 'Reuniões CupomClic (Robô)' },
-      });
-
-      const calendarId = newCalendar.data.id;
-
-      await calendar.acl.insert({
-        calendarId,
-        requestBody: {
-          role: 'writer',
-          scope: {
-            type: 'user',
-            value: 'tokto@cupomclic.com',
-          },
-        },
-      });
-
-      return res.status(200).json({
-        sucesso: true,
-        mensagem: 'Nova agenda criada com sucesso pelo robô!',
-        COPIE_ESTE_ID: calendarId,
-      });
-    }
-
-    const calendarId = process.env.GOOGLE_CALENDAR_ID;
+    
+    // Usaremos 'primary' para salvar na própria agenda nativa do robô (onde ele tem 100% de acesso)
+    const calendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
 
     // --- ROTA GET: Ler horários ocupados ---
     if (req.method === 'GET') {
@@ -107,6 +81,10 @@ module.exports = async function handler(req, res) {
           dateTime: endDate.toISOString(),
           timeZone: 'America/Sao_Paulo',
         },
+        // Adicionamos você como participante para o evento aparecer direto no seu calendário pessoal
+        attendees: [
+          { email: 'tokto@cupomclic.com' } 
+        ],
         conferenceData: {
           createRequest: {
             requestId: `meet-${Date.now()}`,
@@ -119,6 +97,7 @@ module.exports = async function handler(req, res) {
         calendarId,
         requestBody: event,
         conferenceDataVersion: 1,
+        sendUpdates: 'none', // Não envia e-mails chatos do Google, apenas adiciona o evento
       });
 
       const meetLink = response.data.hangoutLink || response.data.htmlLink;
