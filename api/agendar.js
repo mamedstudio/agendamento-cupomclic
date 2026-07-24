@@ -45,14 +45,6 @@ export default async function handler(req, res) {
 
     const BASE_URL_SALA = 'https://agendamento-cupomclic.vercel.app/sala.html';
 
-    // Função para extrair HH:MM sem contaminação de fuso horário do servidor
-    const extrairHoraExata = (dateTimeStr) => {
-      if (!dateTimeStr) return '';
-      // Procura o padrão T15:00:00 na string de data
-      const match = dateTimeStr.match(/T(\d{2}:\d{2})/);
-      return match ? match[1] : '';
-    };
-
     // ----------------------------------------------------
     // METODO GET: Consulta os agendamentos (Formulário + Admin)
     // ----------------------------------------------------
@@ -63,6 +55,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Data não informada.' });
       }
 
+      // Intervalo exato do dia no fuso de São Paulo
       const timeMin = `${data}T00:00:00-03:00`;
       const timeMax = `${data}T23:59:59-03:00`;
 
@@ -72,43 +65,47 @@ export default async function handler(req, res) {
         timeMax: timeMax,
         singleEvents: true,
         orderBy: 'startTime',
-        timeZone: 'America/Sao_Paulo'
       });
 
       const events = response.data.items || [];
 
-      // Mapeia horários ocupados cravados em fuso de SP
-      const ocupados = events.map(event => {
-        if (event.start) {
-          const rawTime = event.start.dateTime || event.start.date;
-          return extrairHoraExata(rawTime);
-        }
-        return null;
-      }).filter(Boolean);
+      // Mapeia os horários para anular os botões no formulário
+      const ocupados = [];
+      const detalhes = [];
 
-      // Dados estruturados para o Painel Admin
-      const detalhes = events.map(event => {
-        const rawTime = event.start ? (event.start.dateTime || event.start.date) : '';
-        const horaStr = extrairHoraExata(rawTime);
+      for (const event of events) {
+        let horaStr = '';
 
-        let meetLink = '';
-        if (event.description) {
-          const match = event.description.match(/https?:\/\/[^\s]+sala\.html[^\s]*/);
-          if (match) meetLink = match[0];
+        // Extrai a hora exata enviada (formato HH:MM)
+        if (event.start && event.start.dateTime) {
+          const match = event.start.dateTime.match(/T(\d{2}:\d{2})/);
+          if (match) {
+            horaStr = match[1];
+            ocupados.push(horaStr);
+          }
         }
 
-        if (!meetLink) {
-          meetLink = `${BASE_URL_SALA}?id=cupom-${data.replace(/-/g, '')}-${event.id.substring(0, 6)}`;
-        }
+        // Se for um evento válido de horário
+        if (horaStr) {
+          let meetLink = '';
+          if (event.description) {
+            const matchLink = event.description.match(/https?:\/\/[^\s]+sala\.html[^\s]*/);
+            if (matchLink) meetLink = matchLink[0];
+          }
 
-        return {
-          id: event.id,
-          horario: horaStr,
-          titulo: event.summary || 'Sem título',
-          descricao: event.description || '',
-          meetLink: meetLink
-        };
-      });
+          if (!meetLink) {
+            meetLink = `${BASE_URL_SALA}?id=cupom-${data.replace(/-/g, '')}-${event.id.substring(0, 6)}`;
+          }
+
+          detalhes.push({
+            id: event.id,
+            horario: horaStr,
+            titulo: event.summary || 'Sem título',
+            descricao: event.description || '',
+            meetLink: meetLink
+          });
+        }
+      }
 
       return res.status(200).json({ ocupados, detalhes });
     }
@@ -123,6 +120,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Campos obrigatórios ausentes.' });
       }
 
+      // Monta data/hora em ISO com fuso fixo de Brasília (-03:00)
       const startDateTime = `${data}T${hora}:00-03:00`;
       
       const [h, m] = hora.split(':').map(Number);
@@ -144,11 +142,11 @@ export default async function handler(req, res) {
         description: `Agendamento via Site CupomClic\n\nNome: ${nome}\nE-mail: ${email}\nFunção: ${funcao}\nLoja: ${loja}\nWhatsApp: ${whatsapp}\n\nLink da Sala: ${meetLinkCustom}`,
         start: {
           dateTime: startDateTime,
-          timeZone: 'America/Sao_Paulo',
+          timeZone: 'America/Sao_Paulo'
         },
         end: {
           dateTime: endDateTime,
-          timeZone: 'America/Sao_Paulo',
+          timeZone: 'America/Sao_Paulo'
         }
       };
 
