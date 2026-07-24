@@ -1,7 +1,6 @@
 const { google } = require('googleapis');
 
 module.exports = async function handler(req, res) {
-  // Liberar requisições (CORS)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -13,7 +12,7 @@ module.exports = async function handler(req, res) {
   try {
     let rawCreds = process.env.GOOGLE_SERVICE_ACCOUNT;
     if (!rawCreds) {
-      return res.status(500).json({ error: 'Chave de acesso não configurada.' });
+      return res.status(500).json({ error: 'GOOGLE_SERVICE_ACCOUNT não configurada.' });
     }
 
     const credentials = typeof rawCreds === 'string' ? JSON.parse(rawCreds) : rawCreds;
@@ -21,14 +20,42 @@ module.exports = async function handler(req, res) {
       credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
     }
 
-    const calendarId = process.env.GOOGLE_CALENDAR_ID;
-
     const auth = new google.auth.GoogleAuth({
       credentials,
       scopes: ['https://www.googleapis.com/auth/calendar'],
     });
 
     const calendar = google.calendar({ version: 'v3', auth });
+
+    // --- ROTA DE SETUP: Executada uma única vez no navegador ---
+    if (req.method === 'GET' && req.query.setup === 'true') {
+      // 1. Robô cria a própria agenda
+      const newCalendar = await calendar.calendars.insert({
+        requestBody: { summary: 'Reuniões CupomClic (Robô)' },
+      });
+
+      const calendarId = newCalendar.data.id;
+
+      // 2. Robô compartilha essa agenda com o seu e-mail pessoal
+      await calendar.acl.insert({
+        calendarId,
+        requestBody: {
+          role: 'writer',
+          scope: {
+            type: 'user',
+            value: 'tokto@cupomclic.com', // Seu e-mail
+          },
+        },
+      });
+
+      return res.status(200).json({
+        sucesso: true,
+        mensagem: 'Nova agenda criada com sucesso pelo robô!',
+        COPIE_ESTE_ID: calendarId,
+      });
+    }
+
+    const calendarId = process.env.GOOGLE_CALENDAR_ID;
 
     // --- ROTA GET: Ler horários ocupados ---
     if (req.method === 'GET') {
