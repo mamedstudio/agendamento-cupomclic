@@ -41,9 +41,10 @@ export default async function handler(req, res) {
     );
 
     const calendar = google.calendar({ version: 'v3', auth });
-    
-    // Sempre na agenda nativa do robô
     const calendarId = 'primary';
+
+    // LINK OFICIAL DO GOOGLE MEET PARA ABRIR A SALA IMEDIATAMENTE
+    const LINK_MEET_PADRAO = 'https://meet.google.com/new';
 
     // ----------------------------------------------------
     // METODO GET: Consulta os agendamentos (Formulário + Admin)
@@ -68,7 +69,7 @@ export default async function handler(req, res) {
 
       const events = response.data.items || [];
 
-      // Lista de horários ocupados para desabilitar os botões no formulário
+      // Horários bloqueados para o formulário público
       const ocupados = events.map(event => {
         if (event.start && event.start.dateTime) {
           const date = new Date(event.start.dateTime);
@@ -79,7 +80,7 @@ export default async function handler(req, res) {
         return null;
       }).filter(Boolean);
 
-      // Dados para o Painel Admin (/admin.html)
+      // Detalhes completos para renderizar a tabela no Painel Admin
       const detalhes = events.map(event => {
         let horaStr = '';
         if (event.start && event.start.dateTime) {
@@ -89,8 +90,7 @@ export default async function handler(req, res) {
           horaStr = `${horas}:${minutos}`;
         }
 
-        // Tenta pegar hangoutLink se existir; caso contrário gera o link do Meet direto
-        const urlMeet = event.hangoutLink || `https://meet.google.com/cupomclic-${data.replace(/-/g, '')}-${horaStr.replace(':', '')}`;
+        const urlMeet = event.hangoutLink || LINK_MEET_PADRAO;
 
         return {
           id: event.id,
@@ -127,7 +127,6 @@ export default async function handler(req, res) {
       const endMStr = String(endM).padStart(2, '0');
       const endDateTime = `${data}T${endHStr}:${endMStr}:00-03:00`;
 
-      // Evento limpo sem o bloco conferenceData que quebra a Service Account
       const event = {
         summary: `Reunião VIP CupomClic - ${loja} (${nome})`,
         description: `Agendamento via Site CupomClic\n\nNome: ${nome}\nE-mail: ${email}\nFunção: ${funcao}\nLoja: ${loja}\nWhatsApp: ${whatsapp}`,
@@ -146,9 +145,7 @@ export default async function handler(req, res) {
         resource: event
       });
 
-      // Link direto do Google Meet gerado com base no agendamento
-      const meetLink = createdEvent.data.hangoutLink || 
-                       `https://meet.google.com/cupomclic-${data.replace(/-/g, '')}-${hora.replace(':', '')}`;
+      const meetLink = createdEvent.data.hangoutLink || LINK_MEET_PADRAO;
 
       return res.status(200).json({
         success: true,
