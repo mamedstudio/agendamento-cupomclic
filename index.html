@@ -40,193 +40,59 @@
       border: 1px solid var(--border);
     }
 
-    h1 {
-      font-size: 24px;
-      text-align: center;
-      margin-top: 0;
-      margin-bottom: 6px;
+    h1 { font-size: 24px; text-align: center; margin-top: 0; margin-bottom: 6px; }
+
+    p.subtitulo { text-align: center; color: var(--text-muted); font-size: 14px; margin-bottom: 25px; }
+
+    .form-group { margin-bottom: 18px; }
+
+    label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+
+    input[type="date"], input[type="text"], input[type="email"], input[type="tel"], select {
+      width: 100%; padding: 14px; background-color: #0d131f; border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text); font-size: 15px; outline: none;
     }
 
-    p.subtitulo {
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 14px;
-      margin-bottom: 25px;
-    }
+    input:focus, select:focus { border-color: var(--accent-blue); }
 
-    .form-group {
-      margin-bottom: 18px;
-    }
-
-    label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-
-    input[type="date"],
-    input[type="text"],
-    input[type="email"],
-    input[type="tel"],
-    select {
-      width: 100%;
-      padding: 14px;
-      background-color: #0d131f;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      font-size: 15px;
-      outline: none;
-    }
-
-    input:focus, select:focus {
-      border-color: var(--accent-blue);
-    }
-
-    .grid-horarios {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 8px;
-    }
+    .grid-horarios { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px; }
 
     .btn-horario {
-      padding: 12px 6px;
-      background-color: #0d131f;
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.2s;
+      padding: 12px 6px; background-color: #0d131f; border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.2s;
     }
-
-    .btn-horario:hover:not(:disabled) {
-      border-color: var(--accent-blue);
-      color: var(--accent-blue);
-    }
-
+    .btn-horario:hover:not(:disabled) { border-color: var(--accent-blue); color: var(--accent-blue); }
     .btn-horario.ocupado {
-      background-color: #161f30;
-      color: #475569;
-      text-decoration: line-through;
-      border-color: #161f30;
-      cursor: not-allowed;
-      opacity: 0.5;
+      background-color: #161f30; color: #475569; text-decoration: line-through;
+      border-color: #161f30; cursor: not-allowed; opacity: 0.5;
     }
 
-    /* CARD UX DA SELEÇÃO */
     .card-selecionado {
-      background-color: #0d131f;
-      border: 1px solid var(--green);
-      border-radius: 12px;
-      padding: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
+      background-color: #0d131f; border: 1px solid var(--green); border-radius: 12px;
+      padding: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
     }
+    .card-selecionado .info-data { font-size: 13px; color: var(--text-muted); }
+    .card-selecionado .info-destaque { font-size: 16px; font-weight: bold; color: var(--green); margin-top: 2px; }
 
-    .card-selecionado .info-data {
-      font-size: 13px;
-      color: var(--text-muted);
-    }
+    .btn-alterar { background: #243044; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
 
-    .card-selecionado .info-destaque {
-      font-size: 16px;
-      font-weight: bold;
-      color: var(--green);
-      margin-top: 2px;
-    }
+    #secaoFormulario { display: none; }
 
-    .btn-alterar {
-      background: #243044;
-      color: #fff;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    #secaoFormulario {
-      display: none;
-    }
-
-    .box-lgpd {
-      margin-top: 15px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      text-align: left;
-    }
-
-    .box-lgpd input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      accent-color: var(--accent-blue);
-      cursor: pointer;
-      margin-top: 2px;
-    }
-
-    .box-lgpd label {
-      font-size: 12px;
-      color: var(--text-muted);
-      line-height: 1.4;
-      margin-bottom: 0;
-      cursor: pointer;
-    }
-
-    .box-lgpd a {
-      color: #38bdf8;
-      text-decoration: underline;
-    }
+    .box-lgpd { margin-top: 15px; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 10px; text-align: left; }
+    .box-lgpd input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent-blue); cursor: pointer; margin-top: 2px; }
+    .box-lgpd label { font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-bottom: 0; cursor: pointer; }
+    .box-lgpd a { color: #38bdf8; text-decoration: underline; }
 
     .btn-submit {
-      width: 100%;
-      padding: 16px;
-      background-color: var(--accent-blue);
-      color: #ffffff;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+      width: 100%; padding: 16px; background-color: var(--accent-blue); color: #ffffff; border: none;
+      border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4); display: flex; align-items: center; justify-content: center; gap: 8px;
     }
+    .btn-submit:hover { background-color: var(--accent-blue-hover); }
+    .btn-submit:disabled { background-color: #243044; color: #64748b; cursor: not-allowed; box-shadow: none; }
 
-    .btn-submit:hover {
-      background-color: var(--accent-blue-hover);
-    }
-
-    .btn-submit:disabled {
-      background-color: #243044;
-      color: #64748b;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    .version-footer {
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 20px;
-    }
-
-    .status-msg {
-      margin-top: 12px;
-      text-align: center;
-      font-size: 13px;
-    }
+    .version-footer { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 20px; }
+    .status-msg { margin-top: 12px; text-align: center; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -235,20 +101,17 @@
     <h1>🚀 Reunião VIP CupomClic</h1>
     <p class="subtitulo">Agende sua sessão individual de suporte</p>
 
-    <!-- ETAPA 1: SELEÇÃO DE DATA E HORÁRIO -->
     <div id="secaoSelecao">
       <div class="form-group">
         <label for="dataInput">Selecione a Data:</label>
         <input type="date" id="dataInput">
       </div>
-
       <div class="form-group">
         <label>Horários Disponíveis:</label>
         <div id="gridHorarios" class="grid-horarios"></div>
       </div>
     </div>
 
-    <!-- ETAPA 2: FORMULÁRIO -->
     <div id="secaoFormulario">
       <div class="card-selecionado">
         <div>
@@ -259,26 +122,10 @@
       </div>
 
       <form id="formAgendamento">
-        <div class="form-group">
-          <label for="nome">Nome Completo:</label>
-          <input type="text" id="nome" required placeholder="Seu nome">
-        </div>
-
-        <div class="form-group">
-          <label for="loja">Nome da Sua Loja:</label>
-          <input type="text" id="loja" required placeholder="Nome da loja">
-        </div>
-
-        <div class="form-group">
-          <label for="whatsapp">WhatsApp com DDD:</label>
-          <input type="tel" id="whatsapp" required placeholder="Ex: 14999998888">
-        </div>
-
-        <div class="form-group">
-          <label for="email">E-mail comercial:</label>
-          <input type="email" id="email" required placeholder="seuemail@exemplo.com">
-        </div>
-
+        <div class="form-group"><label for="nome">Nome Completo:</label><input type="text" id="nome" required placeholder="Seu nome"></div>
+        <div class="form-group"><label for="loja">Nome da Sua Loja:</label><input type="text" id="loja" required placeholder="Nome da loja"></div>
+        <div class="form-group"><label for="whatsapp">WhatsApp com DDD:</label><input type="tel" id="whatsapp" required placeholder="Ex: 14999998888"></div>
+        <div class="form-group"><label for="email">E-mail comercial:</label><input type="email" id="email" required placeholder="seuemail@exemplo.com"></div>
         <div class="form-group">
           <label for="funcao">Qual sua função na loja?</label>
           <select id="funcao" required>
@@ -288,28 +135,20 @@
             <option value="Outro">Outro</option>
           </select>
         </div>
-
         <div class="box-lgpd">
           <input type="checkbox" id="aceiteTermos" required>
-          <label for="aceiteTermos">
-            Concordo com o uso dos meus dados para o agendamento e suporte, conforme os <a href="/termos.html" target="_blank">Termos e Condições</a>.
-          </label>
+          <label for="aceiteTermos">Concordo com o uso dos meus dados para o agendamento e suporte, conforme os <a href="/termos.html" target="_blank">Termos e Condições</a>.</label>
         </div>
-
-        <button type="submit" class="btn-submit" id="btnSubmit">
-          ⚡ Confirmar Agendamento VIP
-        </button>
+        <button type="submit" class="btn-submit" id="btnSubmit">⚡ Confirmar Agendamento VIP</button>
       </form>
     </div>
 
-    <!-- ETAPA 3: TELA DE CONFIRMAÇÃO -->
     <div id="telaConfirmacao" style="display:none;">
       <div style="text-align:center; margin-bottom:20px;">
         <div style="font-size:44px;">✅</div>
         <h2 style="margin:6px 0 0; color:var(--green); font-size:22px;">Horário confirmado!</h2>
         <div style="font-size:17px; font-weight:bold; color:var(--text); margin-top:10px;" id="confDataHora"></div>
       </div>
-
       <div style="background:#0d131f; border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:16px; text-align:left;">
         <div style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px;">O que acontece agora</div>
         <ul style="margin:0; padding-left:18px; font-size:13px; color:var(--text-muted); line-height:1.9;">
@@ -319,29 +158,21 @@
           <li>Sem mensalidade, sem contrato — você vê antes de decidir qualquer coisa</li>
         </ul>
       </div>
-
       <div style="display:flex; flex-direction:column; gap:10px;">
-        <button class="btn-submit" onclick="baixarICS()" style="background:#243044; box-shadow:none;">
-          📅 Salvar no meu calendário
-        </button>
-        <button class="btn-submit" id="btnIrSala">
-          🚪 Conhecer minha sala agora
-        </button>
+        <button class="btn-submit" onclick="baixarICS()" style="background:#243044; box-shadow:none;">📅 Salvar no meu calendário</button>
+        <button class="btn-submit" id="btnIrSala">🚪 Conhecer minha sala agora</button>
       </div>
-
       <div style="margin-top:14px; font-size:11px; color:var(--text-muted); text-align:center; word-break:break-all;" id="confSalaLink"></div>
     </div>
 
     <div id="statusMsg" class="status-msg"></div>
 
-    <!-- MUDANÇA DE VERSÃO PARA CONFIRMAÇÃO DO DEPLOY -->
-    <div class="version-footer">
-      Versão: <b>v1.0.6 - Confirmação UX</b>
-    </div>
+    <div class="version-footer">Versão: <b>v1.0.7 - Bloqueio de horário passado</b></div>
   </div>
 
   <script>
     const HORARIOS_PADRAO = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+    const MIN_LEAD_MIN = 30; // horário precisa estar a pelo menos 30min no futuro
 
     const dataInput = document.getElementById('dataInput');
     const gridHorarios = document.getElementById('gridHorarios');
@@ -353,13 +184,20 @@
 
     let horaSelecionada = null;
 
-    const hoje = new Date().toISOString().split('T')[0];
+    // Data LOCAL (evita bug de fuso UTC perto da meia-noite)
+    function dataLocalISO() {
+      const d = new Date();
+      const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+      return local.toISOString().split('T')[0];
+    }
+
+    const hoje = dataLocalISO();
     dataInput.value = hoje;
     dataInput.min = hoje;
 
     async function buscarHorariosOcupados(dataStr) {
       gridHorarios.innerHTML = '<div style="grid-column: span 3; text-align: center; color: #94a3b8; font-size: 13px;">Buscando horários...</div>';
-      
+
       try {
         const res = await fetch(`/api/agendar?data=${dataStr}`);
         const data = await res.json();
@@ -367,21 +205,39 @@
 
         gridHorarios.innerHTML = '';
 
+        const agora = new Date();
+        const ehHoje = dataStr === dataLocalISO();
+        let disponiveis = 0;
+
         HORARIOS_PADRAO.forEach(hora => {
           const btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'btn-horario';
           btn.textContent = hora;
 
-          if (ocupados.includes(hora)) {
+          // Bloqueia horário que já passou (ou em cima da hora) no dia de hoje
+          let passado = false;
+          if (ehHoje) {
+            const [hh, mm] = hora.split(':').map(Number);
+            const slot = new Date();
+            slot.setHours(hh, mm, 0, 0);
+            passado = slot.getTime() <= agora.getTime() + MIN_LEAD_MIN * 60000;
+          }
+
+          if (ocupados.includes(hora) || passado) {
             btn.classList.add('ocupado');
             btn.disabled = true;
           } else {
+            disponiveis++;
             btn.onclick = () => selecionarHorario(dataStr, hora);
           }
 
           gridHorarios.appendChild(btn);
         });
+
+        if (disponiveis === 0) {
+          gridHorarios.innerHTML += '<div style="grid-column: span 3; text-align:center; color:#94a3b8; font-size:13px;">Os horários de hoje já passaram — escolha outra data. 🙂</div>';
+        }
 
       } catch (err) {
         gridHorarios.innerHTML = '<div style="grid-column: span 3; text-align: center; color: #ef4444; font-size: 13px;">Erro ao carregar horários.</div>';
@@ -392,7 +248,6 @@
       horaSelecionada = hora;
       const partes = dataStr.split('-');
       txtResumoSelecao.textContent = `${partes[2]}/${partes[1]}/${partes[0]} às ${hora}h`;
-
       secaoSelecao.style.display = 'none';
       secaoFormulario.style.display = 'block';
     }
@@ -403,13 +258,10 @@
       secaoSelecao.style.display = 'block';
     }
 
-    dataInput.addEventListener('change', (e) => {
-      buscarHorariosOcupados(e.target.value);
-    });
+    dataInput.addEventListener('change', (e) => { buscarHorariosOcupados(e.target.value); });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-
       const btnSubmit = document.getElementById('btnSubmit');
       btnSubmit.disabled = true;
       btnSubmit.textContent = 'Agendando...';
@@ -431,32 +283,19 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-
         const result = await response.json();
 
         if (result.success) {
-          // ===== TELA DE CONFIRMAÇÃO (não redireciona mais direto) =====
-          window.dadosAgendados = {
-            data: payload.data,
-            hora: payload.hora,
-            loja: payload.loja,
-            meetLink: result.meetLink
-          };
-
+          window.dadosAgendados = { data: payload.data, hora: payload.hora, loja: payload.loja, meetLink: result.meetLink };
           const partes = payload.data.split('-');
-          document.getElementById('confDataHora').textContent =
-            partes[2] + '/' + partes[1] + ' às ' + payload.hora + 'h';
+          document.getElementById('confDataHora').textContent = partes[2] + '/' + partes[1] + ' às ' + payload.hora + 'h';
           document.getElementById('confSalaLink').textContent = result.meetLink;
-          document.getElementById('btnIrSala').onclick = function () {
-            window.location.href = result.meetLink;
-          };
-
+          document.getElementById('btnIrSala').onclick = function () { window.location.href = result.meetLink; };
           secaoSelecao.style.display = 'none';
           secaoFormulario.style.display = 'none';
           statusMsg.textContent = '';
           document.getElementById('telaConfirmacao').style.display = 'block';
           window.scrollTo({ top: 0, behavior: 'smooth' });
-
         } else {
           statusMsg.style.color = '#ef4444';
           statusMsg.textContent = result.error || 'Erro ao agendar.';
@@ -471,7 +310,6 @@
       }
     });
 
-    // ===== SALVAR NO CALENDÁRIO (.ics) =====
     function baixarICS() {
       const d = window.dadosAgendados;
       if (!d) return;
