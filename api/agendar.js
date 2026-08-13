@@ -128,7 +128,11 @@ export default async function handler(req, res) {
       if (whatsLimpo.length < 10) {
         return res.status(400).json({ error: 'WhatsApp inválido. Use DDD + número.' });
       }
-
+      // 🛑 Bloqueia horário no passado (ou em cima da hora)
+      const startCheck = new Date(`${data}T${hora}:00-03:00`).getTime();
+      if (startCheck <= Date.now() + 30 * 60000) {
+        return res.status(400).json({ error: 'Esse horário já passou. Escolha um horário futuro.' });
+      }
       // 🛑 TRAVA DE SEGURANÇA: evita agendamentos duplos
       const agoraIso = new Date().toISOString();
       const futurasResponse = await calendar.events.list({
