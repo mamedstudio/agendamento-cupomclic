@@ -302,11 +302,41 @@
       </form>
     </div>
 
+    <!-- ETAPA 3: TELA DE CONFIRMAÇÃO -->
+    <div id="telaConfirmacao" style="display:none;">
+      <div style="text-align:center; margin-bottom:20px;">
+        <div style="font-size:44px;">✅</div>
+        <h2 style="margin:6px 0 0; color:var(--green); font-size:22px;">Horário confirmado!</h2>
+        <div style="font-size:17px; font-weight:bold; color:var(--text); margin-top:10px;" id="confDataHora"></div>
+      </div>
+
+      <div style="background:#0d131f; border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:16px; text-align:left;">
+        <div style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px;">O que acontece agora</div>
+        <ul style="margin:0; padding-left:18px; font-size:13px; color:var(--text-muted); line-height:1.9;">
+          <li>O convite já foi pro seu <b style="color:var(--text);">e-mail</b> (confere o spam)</li>
+          <li>Separa <b style="color:var(--text);">1 foto de uma peça</b> — a gente cria o cupom juntos, ao vivo</li>
+          <li>Dura <b style="color:var(--text);">15–20 min</b>, direto ao ponto</li>
+          <li>Sem mensalidade, sem contrato — você vê antes de decidir qualquer coisa</li>
+        </ul>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button class="btn-submit" onclick="baixarICS()" style="background:#243044; box-shadow:none;">
+          📅 Salvar no meu calendário
+        </button>
+        <button class="btn-submit" id="btnIrSala">
+          🚪 Conhecer minha sala agora
+        </button>
+      </div>
+
+      <div style="margin-top:14px; font-size:11px; color:var(--text-muted); text-align:center; word-break:break-all;" id="confSalaLink"></div>
+    </div>
+
     <div id="statusMsg" class="status-msg"></div>
 
     <!-- MUDANÇA DE VERSÃO PARA CONFIRMAÇÃO DO DEPLOY -->
     <div class="version-footer">
-      Versão: <b>v1.0.5 - Meet UX</b>
+      Versão: <b>v1.0.6 - Confirmação UX</b>
     </div>
   </div>
 
@@ -405,7 +435,28 @@
         const result = await response.json();
 
         if (result.success) {
-          window.location.href = result.meetLink;
+          // ===== TELA DE CONFIRMAÇÃO (não redireciona mais direto) =====
+          window.dadosAgendados = {
+            data: payload.data,
+            hora: payload.hora,
+            loja: payload.loja,
+            meetLink: result.meetLink
+          };
+
+          const partes = payload.data.split('-');
+          document.getElementById('confDataHora').textContent =
+            partes[2] + '/' + partes[1] + ' às ' + payload.hora + 'h';
+          document.getElementById('confSalaLink').textContent = result.meetLink;
+          document.getElementById('btnIrSala').onclick = function () {
+            window.location.href = result.meetLink;
+          };
+
+          secaoSelecao.style.display = 'none';
+          secaoFormulario.style.display = 'none';
+          statusMsg.textContent = '';
+          document.getElementById('telaConfirmacao').style.display = 'block';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+
         } else {
           statusMsg.style.color = '#ef4444';
           statusMsg.textContent = result.error || 'Erro ao agendar.';
@@ -419,6 +470,32 @@
         btnSubmit.innerHTML = '⚡ Confirmar Agendamento VIP';
       }
     });
+
+    // ===== SALVAR NO CALENDÁRIO (.ics) =====
+    function baixarICS() {
+      const d = window.dadosAgendados;
+      if (!d) return;
+      const [a, m, dia] = d.data.split('-').map(Number);
+      const [h, min] = d.hora.split(':').map(Number);
+      const inicio = new Date(a, m - 1, dia, h, min);
+      const fim = new Date(inicio.getTime() + 30 * 60000);
+      const f = (dt) => dt.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+      const ics = [
+        'BEGIN:VCALENDAR', 'VERSION: 2.0', 'PRODID:-//CupomClic//Agendamento//PT-BR',
+        'BEGIN:VEVENT',
+        'UID:' + Date.now() + '@cupomclic',
+        'DTSTAMP:' + f(new Date()),
+        'DTSTART:' + f(inicio),
+        'DTEND:' + f(fim),
+        'SUMMARY:Reunião VIP CupomClic - ' + d.loja,
+        'DESCRIPTION:Separe 1 foto de uma peça. Criamos o cupom juntos, ao vivo.',
+        'END:VEVENT', 'END:VCALENDAR'
+      ].join('\r\n');
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+      link.download = 'reuniao-cupomclic.ics';
+      link.click();
+    }
 
     buscarHorariosOcupados(hoje);
   </script>
