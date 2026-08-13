@@ -1,7 +1,8 @@
 import { google } from 'googleapis';
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
 export default async function handler(req, res) {
-  // Configuração de CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -42,7 +43,6 @@ export default async function handler(req, res) {
 
     const calendar = google.calendar({ version: 'v3', auth });
 
-    // ID DA SUA AGENDA REUNIÕES CUPOMCLIC
     const calendarId = '9e28766c113e96cc3f0134d01530e91a8ef4b62cce48da09b950b94306c5007a@group.calendar.google.com';
     const BASE_URL_SALA = 'https://agendamento-cupomclic.vercel.app/sala.html';
 
@@ -118,11 +118,18 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Campos obrigatórios ausentes.' });
       }
 
-      // Normaliza dados para comparação limpa
       const emailLimpo = email.trim().toLowerCase();
-      const whatsLimpo = whatsapp.replace(/\D/g, ''); // Mantém só números
+      const whatsLimpo = whatsapp.replace(/\D/g, '');
 
-      // 🛑 TRAVA DE SEGURANÇA: Busca reuniões a partir de AGORA para evitar agendamentos duplos
+      // Valida formato de e-mail ANTES de chamar o Google
+      if (!EMAIL_RE.test(emailLimpo)) {
+        return res.status(400).json({ error: 'E-mail inválido. Confira e tente novamente.' });
+      }
+      if (whatsLimpo.length < 10) {
+        return res.status(400).json({ error: 'WhatsApp inválido. Use DDD + número.' });
+      }
+
+      // 🛑 TRAVA DE SEGURANÇA: evita agendamentos duplos
       const agoraIso = new Date().toISOString();
       const futurasResponse = await calendar.events.list({
         calendarId: calendarId,
@@ -147,7 +154,6 @@ export default async function handler(req, res) {
         }
       }
 
-      // Se passou da trava, calcula o horário de término (30 min)
       const startIso = `${data}T${hora}:00-03:00`;
       const [h, m] = hora.split(':').map(Number);
       let endH = h;
@@ -179,11 +185,23 @@ export default async function handler(req, res) {
         ]
       };
 
-      const createdEvent = await calendar.events.insert({
-        calendarId: calendarId,
-        resource: event,
-        sendUpdates: 'all'
-      });
+      // Tenta com convidados (dispara e-mail). Se o Google rejeitar, cria sem convidados.
+      let createdEvent;
+      try {
+        createdEvent = await calendar.events.insert({
+          calendarId: calendarId,
+          resource: event,
+          sendUpdates: 'all'
+        });
+      } catch (e1) {
+        console.error('Insert com attendees falhou, tentando sem attendees:', e1.message);
+        delete event.attendees;
+        createdEvent = await calendar.events.insert({
+          calendarId: calendarId,
+          resource: event,
+          sendUpdates: 'none'
+        });
+      }
 
       return res.status(200).json({
         success: true,
