@@ -104,69 +104,17 @@ export default async function handler(req, res) {
         summary: `Reunião VIP CupomClic - ${loja} (${nome})`,
         description: `Agendamento via Site CupomClic\n\nHorário: ${hora}\nNome: ${nome}\nE-mail: ${emailLimpo}\nFunção: ${funcao}\nLoja: ${loja}\nWhatsApp: ${whatsLimpo}\n\nLink da Sala: ${meetLinkCustom}`,
         start: { dateTime: startIso, timeZone: 'America/Sao_Paulo' },
-        end: { dateTime: endIso, timeZone: 'America/Sao_Paulo' },
-        attendees: [{ email: emailLimpo, displayName: nome }]
+        end: { dateTime: endIso, timeZone: 'America/Sao_Paulo' }
       };
 
-      let createdEvent;
-      try {
-        createdEvent = await calendar.events.insert({ calendarId, resource: event, sendUpdates: 'none' });
-      } catch (e1) {
-        delete event.attendees;
-        createdEvent = await calendar.events.insert({ calendarId, resource: event, sendUpdates: 'none' });
-      }
+      const createdEvent = await calendar.events.insert({ calendarId, resource: event, sendUpdates: 'none' });
 
-      // Envia o e-mail NÓS MESMOS (service account não dispara convite)
-      const emailSent = await enviarEmailConfirmacao({ nome, loja, emailLimpo, data, hora, meetLinkCustom });
-
-      return res.status(200).json({ success: true, eventId: createdEvent.data.id, meetLink: meetLinkCustom, emailSent });
+      return res.status(200).json({ success: true, eventId: createdEvent.data.id, meetLink: meetLinkCustom });
     }
 
     return res.status(405).json({ error: 'Método não permitido.' });
   } catch (error) {
     console.error('Erro na API:', error);
     return res.status(500).json({ error: 'Erro interno no servidor de agendamento.', details: error.message });
-  }
-}
-
-// ============ ENVIO DE E-MAIL (Resend) ============
-async function enviarEmailConfirmacao({ nome, loja, emailLimpo, data, hora, meetLinkCustom }) {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) { console.log('RESEND_API_KEY não configurada — e-mail pulado.'); return false; }
-
-  const [a, m, d] = data.split('-');
-  const from = process.env.RESEND_FROM || 'CupomClic <onboarding@resend.dev>';
-
-  const html = `
-    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#0d131f;color:#fff;border-radius:12px;overflow:hidden;">
-      <div style="background:#2563eb;padding:20px;text-align:center;font-size:20px;font-weight:bold;">🚀 Reunião VIP CupomClic</div>
-      <div style="padding:24px;">
-        <p style="font-size:16px;">Olá, <b>${nome}</b>! Sua Reunião VIP está <b style="color:#22c55e;">confirmada</b>.</p>
-        <div style="background:#161f30;border:1px solid #243044;border-radius:10px;padding:16px;margin:16px 0;">
-          <div style="font-size:13px;color:#94a3b8;">Loja</div><div style="font-weight:bold;">${loja}</div>
-          <div style="font-size:13px;color:#94a3b8;margin-top:10px;">Data e hora</div>
-          <div style="font-weight:bold;color:#22c55e;">${d}/${m}/${a} às ${hora}h</div>
-        </div>
-        <a href="${meetLinkCustom}" style="display:block;background:#22c55e;color:#fff;text-align:center;padding:14px;border-radius:10px;font-weight:bold;text-decoration:none;">🚪 Acessar minha sala</a>
-        <p style="font-size:13px;color:#94a3b8;margin-top:16px;">💡 Separe <b>1 foto de uma peça</b> — criaremos o cupom juntos, ao vivo. Dura 15–20 min.</p>
-      </div>
-    </div>`;
-
-  try {
-    const r = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from,
-        to: [emailLimpo],
-        subject: `✅ Confirmado: Reunião VIP CupomClic — ${d}/${m} às ${hora}h`,
-        html
-      })
-    });
-    if (!r.ok) { console.error('Resend erro:', await r.text()); return false; }
-    return true;
-  } catch (e) {
-    console.error('Falha ao enviar e-mail:', e.message);
-    return false;
   }
 }
